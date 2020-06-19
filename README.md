@@ -51,7 +51,7 @@ fake_scores = Discriminator(DiffAugment(fakes, policy=policy))
 ```
 
 ## Citation
-
+If you use this code for your research, please cite our paper.
 ```
 @article{zhao2020diffaugment,
   title={Differentiable Augmentation for Data-Efficient GAN Training},
