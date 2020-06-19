@@ -8,40 +8,34 @@
 
 # pylint: disable=too-many-lines
 import os
-import sys
 import zipfile
 import glob
-import argparse
-import threading
-import six.moves.queue as Queue # pylint: disable=import-error
-import traceback
 import numpy as np
 import tensorflow as tf
 import PIL.Image
 import dnnlib
-import dnnlib.tflib as tflib
 
-from training import dataset
+# ----------------------------------------------------------------------------
 
-#----------------------------------------------------------------------------
 
 def error(msg):
     print('Error: ' + msg)
     exit(1)
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 class TFRecordExporter:
     def __init__(self, tfrecord_dir, expected_images, print_progress=True, progress_interval=10):
-        self.tfrecord_dir       = tfrecord_dir
-        self.tfr_prefix         = os.path.join(self.tfrecord_dir, os.path.basename(self.tfrecord_dir))
-        self.expected_images    = expected_images
-        self.cur_images         = 0
-        self.shape              = None
-        self.resolution_log2    = None
-        self.tfr_writers        = []
-        self.print_progress     = print_progress
-        self.progress_interval  = progress_interval
+        self.tfrecord_dir = tfrecord_dir
+        self.tfr_prefix = os.path.join(self.tfrecord_dir, os.path.basename(self.tfrecord_dir))
+        self.expected_images = expected_images
+        self.cur_images = 0
+        self.shape = None
+        self.resolution_log2 = None
+        self.tfr_writers = []
+        self.print_progress = print_progress
+        self.progress_interval = progress_interval
 
         if self.print_progress:
             print('Creating dataset "%s"' % tfrecord_dir)
@@ -59,11 +53,11 @@ class TFRecordExporter:
             print('%-40s\r' % '', end='', flush=True)
             print('Added %d images.' % self.cur_images)
 
-    def choose_shuffled_order(self): # Note: Images and labels must be added in shuffled order.
+    def choose_shuffled_order(self):  # Note: Images and labels must be added in shuffled order.
         order = np.arange(self.expected_images)
         np.random.RandomState(123).shuffle(order)
-        return order    
-    
+        return order
+
     def set_shape(self, shape):
         self.shape = shape
         self.resolution_log2 = int(np.log2(self.shape[1]))
@@ -104,7 +98,8 @@ class TFRecordExporter:
     def __exit__(self, *args):
         self.close()
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 def create_from_images(dataset, resolution, tfrecord_dir=None, shuffle=True):
     if dataset in ['100-shot-obama', '100-shot-grumpy_cat', '100-shot-panda']:
@@ -123,7 +118,7 @@ def create_from_images(dataset, resolution, tfrecord_dir=None, shuffle=True):
     assert os.path.isdir(image_dir)
     if tfrecord_dir is None:
         tfrecord_dir = image_dir
-    
+
     print('Loading images from "%s"' % image_dir)
     image_filenames = sorted(glob.glob(os.path.join(image_dir, '*')))
     image_filenames = [fname for fname in image_filenames if fname.split('.')[-1] not in ['pkl', 'tfrecords']]
@@ -149,10 +144,10 @@ def create_from_images(dataset, resolution, tfrecord_dir=None, shuffle=True):
                 img = img.resize((resolution, resolution), PIL.Image.ANTIALIAS)
             img = np.asarray(img)
             if channels == 1 or len(img.shape) == 2:
-                img = np.stack([img] * channels) # HW => CHW
+                img = np.stack([img] * channels)  # HW => CHW
             else:
-                img = img.transpose([2, 0, 1]) # HWC => CHW
+                img = img.transpose([2, 0, 1])  # HWC => CHW
             tfr.add_image(img)
     return tfrecord_dir, len(image_filenames)
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------

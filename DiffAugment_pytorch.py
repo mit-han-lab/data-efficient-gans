@@ -2,8 +2,8 @@
 # Shengyu Zhao, Zhijian Liu, Ji Lin, Jun-Yan Zhu, and Song Han
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+
 
 def DiffAugment(x, policy='', channels_first=True):
     if policy:
@@ -16,19 +16,23 @@ def DiffAugment(x, policy='', channels_first=True):
             x = x.permute(0, 2, 3, 1)
     return x
 
+
 def rand_brightness(x):
     x = x + (torch.rand(x.size(0), 1, 1, 1, dtype=x.dtype, device=x.device) - 0.5)
     return x
+
 
 def rand_color(x):
     x_mean = x.mean(dim=1, keepdim=True)
     x = (x - x_mean) * (torch.rand(x.size(0), 1, 1, 1, dtype=x.dtype, device=x.device) * 2) + x_mean
     return x
 
+
 def rand_contrast(x):
-    x_mean = x.mean(dim=[1,2,3], keepdim=True)
+    x_mean = x.mean(dim=[1, 2, 3], keepdim=True)
     x = (x - x_mean) * (torch.rand(x.size(0), 1, 1, 1, dtype=x.dtype, device=x.device) + 0.5) + x_mean
     return x
+
 
 def rand_translation(x, ratio=[1, 8]):
     shift_x, shift_y = x.size(2) // 8, x.size(3) // 8
@@ -45,6 +49,7 @@ def rand_translation(x, ratio=[1, 8]):
     x = x_pad[grid_batch, :, grid_x, grid_y].permute(0, 3, 1, 2)
     return x
 
+
 def rand_cutout(x, ratio=[1, 2]):
     cutout_size = x.size(2) // 2, x.size(3) // 2
     offset_x = torch.randint(0, x.size(2) + (1 - cutout_size[0] % 2), size=[x.size(0), 1, 1], device=x.device)
@@ -60,6 +65,7 @@ def rand_cutout(x, ratio=[1, 2]):
     mask[grid_batch, grid_x, grid_y] = 0
     x = x * mask.unsqueeze(1)
     return x
+
 
 AUGMENT_FNS = {
     'color': [rand_brightness, rand_color, rand_contrast],

@@ -8,14 +8,17 @@ import pickle
 import dnnlib
 import dnnlib.tflib as tflib
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 def get_path_or_url(path_or_url):
     return path_or_url.replace('mit-han-lab:', 'https://hanlab.mit.edu/projects/data-efficient-gans/models/')
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 _cached_networks = dict()
+
 
 def load_networks(path_or_gdrive_path):
     path_or_url = get_path_or_url(path_or_gdrive_path)
@@ -33,4 +36,4 @@ def load_networks(path_or_gdrive_path):
     _cached_networks[path_or_url] = G, D, Gs
     return G, D, Gs
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------

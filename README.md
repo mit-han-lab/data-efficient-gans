@@ -4,7 +4,7 @@
 
 ![few_shot-comparison](imgs/few_shot-comparison.jpg)
 
-*Few-shot generation without pre-training. With DiffAugment, our model can generate high-fidelity images using only only 100 Obama portraits (top) from our collected 100-shot datasets, 160 cats (middle) or 389 dogs (bottom) from the AnimalFace dataset at 256×256 resolution.*
+*Few-shot generation without pre-training. With DiffAugment, our model can generate high-fidelity images using only 100 Obama portraits (top) from our collected 100-shot datasets, 160 cats (middle) or 389 dogs (bottom) from the AnimalFace dataset at 256×256 resolution.*
 
 ![cifar10-results](imgs/cifar10-results.jpg)
 
@@ -14,9 +14,9 @@ The performance of generative adversarial networks (GANs) heavily deteriorates g
 
 Differentiable Augmentation for Data-Efficient GAN Training
 
-[Shengyu Zhao](https://scholar.google.com/citations?user=gLCdw70AAAAJ), [Zhijian Liu](http://zhijianliu.com/), [Ji Lin](http://linji.me/), [Jun-Yan Zhu](https://people.csail.mit.edu/junyanz/), and [Song Han](https://songhan.mit.edu/)
-
-[[arXiv preprint]](https://arxiv.org/pdf/2006.10738.pdf)
+[Shengyu Zhao](https://scholar.google.com/citations?user=gLCdw70AAAAJ), [Zhijian Liu](http://zhijianliu.com/), [Ji Lin](http://linji.me/), [Jun-Yan Zhu](https://people.csail.mit.edu/junyanz/), and [Song Han](https://songhan.mit.edu/)<br>
+MIT, Tsinghua, Adobe Research<br>
+[arXiv](https://arxiv.org/pdf/2006.10738.pdf)
 
 ## Overview
 
@@ -26,13 +26,13 @@ Differentiable Augmentation for Data-Efficient GAN Training
 
 ## Getting Started
 
-To replicate our results of *StyleGAN2 + DiffAugment* for unconditional generation on CIFAR and few-shot generation, please go to the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) folder.
+To run *StyleGAN2 + DiffAugment* for unconditional generation on CIFAR and few-shot generation, please go to the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) folder.
 
-To use DiffAugment in another codebase, we provide portable DiffAugment operations of both TensorFlow and PyTorch versions in [DiffAugment_tf.py](https://github.com/mit-han-lab/data-efficient-gans/blob/master/DiffAugment_tf.py) and [DiffAugment_pytorch.py](https://github.com/mit-han-lab/data-efficient-gans/blob/master/DiffAugment_pytorch.py). Generally, DiffAugment can be easily applied in any codebase by substituting every *D(x)* with *D(T(x))*, where *x* can be real images or fake images, *D* is the discriminator, and *T* is the DiffAugment operation. For example,
+To use DiffAugment in your own codebase, we provide portable DiffAugment operations of both TensorFlow and PyTorch versions in [DiffAugment_tf.py](https://github.com/mit-han-lab/data-efficient-gans/blob/master/DiffAugment_tf.py) and [DiffAugment_pytorch.py](https://github.com/mit-han-lab/data-efficient-gans/blob/master/DiffAugment_pytorch.py). Generally, DiffAugment can be easily applied in any model by substituting every *D(x)* with *D(T(x))*, where *x* can be real images or fake images, *D* is the discriminator, and *T* is the DiffAugment operation. For example,
 
 ```
-from DiffAugment_tf/DiffAugment_pytorch import DiffAugment
-
+from DiffAugment_pytorch import DiffAugment
+# from DiffAugment_tf import DiffAugment
 policy = 'color,translation,cutout' # If your dataset is as small as ours (e.g.,
 # 100 images), we recommend using the strongest DiffAugment:  Color + Translation + Cutout.
 # For large datasets, try using a subset of transformations in ['color', 'translation', 'cutout'].
@@ -58,4 +58,3 @@ fake_scores = Discriminator(DiffAugment(fakes, policy=policy))
   year={2020}
 }
 ```
-

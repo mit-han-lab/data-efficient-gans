@@ -3,6 +3,7 @@
 
 import tensorflow as tf
 
+
 def DiffAugment(x, policy='', channels_first=False):
     if policy:
         if channels_first:
@@ -14,10 +15,12 @@ def DiffAugment(x, policy='', channels_first=False):
             x = tf.transpose(x, [0, 3, 1, 2])
     return x
 
+
 def rand_brightness(x):
     magnitude = tf.random.uniform([tf.shape(x)[0], 1, 1, 1]) - 0.5
     x = x + magnitude
     return x
+
 
 def rand_color(x):
     magnitude = tf.random.uniform([tf.shape(x)[0], 1, 1, 1]) * 2
@@ -25,11 +28,13 @@ def rand_color(x):
     x = (x - x_mean) * magnitude + x_mean
     return x
 
+
 def rand_contrast(x):
     magnitude = tf.random.uniform([tf.shape(x)[0], 1, 1, 1]) + 0.5
     x_mean = tf.reduce_mean(x, axis=[1, 2, 3], keepdims=True)
     x = (x - x_mean) * magnitude + x_mean
     return x
+
 
 def rand_translation(x, ratio=[1, 8]):
     B, H, W = tf.shape(x)[0], tf.shape(x)[1], tf.shape(x)[2]
@@ -40,6 +45,7 @@ def rand_translation(x, ratio=[1, 8]):
     x = tf.transpose(tf.gather_nd(tf.pad(tf.transpose(x, [0, 2, 1, 3]), [[0, 0], [1, 1], [0, 0], [0, 0]]), tf.expand_dims(grid_x, -1), batch_dims=1), [0, 2, 1, 3])
     x = tf.gather_nd(tf.pad(x, [[0, 0], [1, 1], [0, 0], [0, 0]]), tf.expand_dims(grid_y, -1), batch_dims=1)
     return x
+
 
 def rand_cutout(x, ratio=[1, 2]):
     batch_size = tf.shape(x)[0]
@@ -55,6 +61,7 @@ def rand_cutout(x, ratio=[1, 2]):
     mask = tf.maximum(1 - tf.scatter_nd(cutout_grid, tf.ones([batch_size, cutout_size[0], cutout_size[1]], dtype=tf.float32), mask_shape), 0)
     x = x * tf.expand_dims(mask, axis=3)
     return x
+
 
 AUGMENT_FNS = {
     'color': [rand_brightness, rand_color, rand_contrast],

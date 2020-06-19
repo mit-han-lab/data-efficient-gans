@@ -18,18 +18,19 @@ from metrics import metric_base
 from metrics.metric_defaults import metric_defaults
 from training import dataset_tool
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 def run(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, total_kimg, ema_kimg, num_samples, gamma, fmap_base, fmap_max, latent_size, mirror_augment, impl, metrics, resume, resume_kimg, num_repeats, eval):
-    train     = EasyDict(run_func_name='training.training_loop.training_loop') # Options for training loop.
-    G         = EasyDict(func_name='training.networks_stylegan2.G_main')       # Options for generator network.
-    D         = EasyDict(func_name='training.networks_stylegan2.D_stylegan2')  # Options for discriminator network.
-    G_opt     = EasyDict(beta1=0.0, beta2=0.99, epsilon=1e-8)                  # Options for generator optimizer.
-    D_opt     = EasyDict(beta1=0.0, beta2=0.99, epsilon=1e-8)                  # Options for discriminator optimizer.
+    train = EasyDict(run_func_name='training.training_loop.training_loop')  # Options for training loop.
+    G = EasyDict(func_name='training.networks_stylegan2.G_main')       # Options for generator network.
+    D = EasyDict(func_name='training.networks_stylegan2.D_stylegan2')  # Options for discriminator network.
+    G_opt = EasyDict(beta1=0.0, beta2=0.99, epsilon=1e-8)                  # Options for generator optimizer.
+    D_opt = EasyDict(beta1=0.0, beta2=0.99, epsilon=1e-8)                  # Options for discriminator optimizer.
     loss_args = EasyDict(func_name='training.loss.ns_DiffAugment_r1')          # Options for loss.
-    sched     = EasyDict()                                                     # Options for TrainingSchedule.
-    grid      = EasyDict(size='4k', layout='random')                           # Options for setup_snapshot_image_grid().
-    sc        = dnnlib.SubmitConfig()                                          # Options for dnnlib.submit_run().
+    sched = EasyDict()                                                     # Options for TrainingSchedule.
+    grid = EasyDict(size='4k', layout='random')                           # Options for setup_snapshot_image_grid().
+    sc = dnnlib.SubmitConfig()                                          # Options for dnnlib.submit_run().
     tf_config = {'rnd.np_random_seed': 1000}                                   # Options for tflib.init_tf().
 
     train.total_kimg = total_kimg
@@ -45,7 +46,7 @@ def run(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, tota
     desc += '-' + os.path.basename(dataset)
     if resolution is not None:
         desc += '-{}'.format(resolution)
-    
+
     if num_samples is not None:
         dataset_args.num_samples = num_samples
         desc += '-{}samples'.format(num_samples)
@@ -72,7 +73,7 @@ def run(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, tota
     if latent_size is not None:
         G.latent_size = G.mapping_fmaps = G.dlatent_size = latent_size
         desc += '-latent{}'.format(latent_size)
-    
+
     if gamma is not None:
         loss_args.gamma = gamma
         desc += '-gamma{}'.format(gamma)
@@ -94,7 +95,8 @@ def run(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, tota
     kwargs.submit_config.run_desc = desc
     dnnlib.submit_run(**kwargs)
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 def run_eval(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, total_kimg, ema_kimg, num_samples, gamma, fmap_base, fmap_max, latent_size, mirror_augment, impl, metrics, resume, resume_kimg, num_repeats, eval):
     dataset, total_samples = dataset_tool.create_from_images(dataset, resolution)
@@ -105,7 +107,8 @@ def run_eval(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size,
     metric_group = metric_base.MetricGroup([metric_defaults[metric] for metric in metrics], num_repeats=num_repeats)
     metric_group.run(resume, dataset_args=dataset_args, num_gpus=num_gpus)
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 def _str_to_bool(v):
     if isinstance(v, bool):
@@ -117,12 +120,14 @@ def _str_to_bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+
 def _parse_comma_sep(s):
     if s is None or s.lower() == 'none' or s == '':
         return []
     return s.split(',')
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -156,7 +161,7 @@ def main():
 
     for metric in args.metrics:
         if metric not in metric_defaults:
-            print ('Error: unknown metric \'%s\'' % metric)
+            print('Error: unknown metric \'%s\'' % metric)
             sys.exit(1)
 
     if args.eval:
@@ -164,10 +169,10 @@ def main():
     else:
         run(**vars(args))
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
 
 if __name__ == "__main__":
     main()
 
-#----------------------------------------------------------------------------
-
+# ----------------------------------------------------------------------------

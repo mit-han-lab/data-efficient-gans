@@ -10,19 +10,19 @@ import numpy as np
 import tensorflow as tf
 import dnnlib
 import dnnlib.tflib as tflib
-import functools
 from dnnlib.tflib.ops.upfirdn_2d import upsample_2d, downsample_2d, upsample_conv_2d, conv_downsample_2d
 from dnnlib.tflib.ops.fused_bias_act import fused_bias_act
 
 # NOTE: Do not import any application-specific modules here!
 # Specify all network parameters as kwargs.
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Get/create weight tensor for a convolution or fully-connected layer.
 
+
 def get_weight(shape, gain=1, use_wscale=True, lrmul=1, weight_var='weight'):
-    fan_in = np.prod(shape[:-1]) # [kernel, kernel, fmaps_in, fmaps_out] or [in, out]
-    he_std = gain / np.sqrt(fan_in) # He init
+    fan_in = np.prod(shape[:-1])  # [kernel, kernel, fmaps_in, fmaps_out] or [in, out]
+    he_std = gain / np.sqrt(fan_in)  # He init
 
     # Equalized learning rate and custom learning rate multiplier.
     if use_wscale:
@@ -36,8 +36,9 @@ def get_weight(shape, gain=1, use_wscale=True, lrmul=1, weight_var='weight'):
     init = tf.initializers.random_normal(0, init_std)
     return tf.get_variable(weight_var, shape=shape, initializer=init) * runtime_coef
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Fully-connected layer.
+
 
 def dense_layer(x, fmaps, gain=1, use_wscale=True, lrmul=1, weight_var='weight'):
     if len(x.shape) > 2:
@@ -46,8 +47,9 @@ def dense_layer(x, fmaps, gain=1, use_wscale=True, lrmul=1, weight_var='weight')
     w = tf.cast(w, x.dtype)
     return tf.matmul(x, w)
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Convolution layer with optional upsampling or downsampling.
+
 
 def conv2d_layer(x, fmaps, kernel, up=False, down=False, resample_kernel=None, gain=1, use_wscale=True, lrmul=1, weight_var='weight', impl='cuda'):
     assert not (up and down)
@@ -58,18 +60,20 @@ def conv2d_layer(x, fmaps, kernel, up=False, down=False, resample_kernel=None, g
     elif down:
         x = conv_downsample_2d(x, tf.cast(w, x.dtype), data_format='NCHW', k=resample_kernel, impl=impl)
     else:
-        x = tf.nn.conv2d(x, tf.cast(w, x.dtype), data_format='NCHW', strides=[1,1,1,1], padding='SAME')
+        x = tf.nn.conv2d(x, tf.cast(w, x.dtype), data_format='NCHW', strides=[1, 1, 1, 1], padding='SAME')
     return x
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Apply bias and activation func.
+
 
 def apply_bias_act(x, act='linear', alpha=None, gain=None, lrmul=1, bias_var='bias', impl='cuda'):
     b = tf.get_variable(bias_var, shape=[x.shape[1]], initializer=tf.initializers.zeros()) * lrmul
     return fused_bias_act(x, b=tf.cast(b, x.dtype), act=act, alpha=alpha, gain=gain, impl=impl)
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Naive upsampling (nearest neighbor) and downsampling (average pooling).
+
 
 def naive_upsample_2d(x, factor=2):
     with tf.variable_scope('NaiveUpsample'):
@@ -78,14 +82,16 @@ def naive_upsample_2d(x, factor=2):
         x = tf.tile(x, [1, 1, 1, factor, 1, factor])
         return tf.reshape(x, [-1, C, H * factor, W * factor])
 
+
 def naive_downsample_2d(x, factor=2):
     with tf.variable_scope('NaiveDownsample'):
         _N, C, H, W = x.shape.as_list()
         x = tf.reshape(x, [-1, C, H // factor, factor, W // factor, factor])
-        return tf.reduce_mean(x, axis=[3,5])
+        return tf.reduce_mean(x, axis=[3, 5])
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Modulated convolution layer.
+
 
 def modulated_conv2d_layer(x, y, fmaps, kernel, up=False, down=False, demodulate=True, resample_kernel=None, gain=1, use_wscale=True, lrmul=1, fused_modconv=True, weight_var='weight', mod_weight_var='mod_weight', mod_bias_var='mod_bias', impl='cuda'):
     assert not (up and down)
@@ -93,24 +99,24 @@ def modulated_conv2d_layer(x, y, fmaps, kernel, up=False, down=False, demodulate
 
     # Get weight.
     w = get_weight([kernel, kernel, x.shape[1].value, fmaps], gain=gain, use_wscale=use_wscale, lrmul=lrmul, weight_var=weight_var)
-    ww = w[np.newaxis] # [BkkIO] Introduce minibatch dimension.
+    ww = w[np.newaxis]  # [BkkIO] Introduce minibatch dimension.
 
     # Modulate.
-    s = dense_layer(y, fmaps=x.shape[1].value, weight_var=mod_weight_var) # [BI] Transform incoming W to style.
-    s = apply_bias_act(s, bias_var=mod_bias_var, impl=impl) + 1 # [BI] Add bias (initially 1).
-    ww *= tf.cast(s[:, np.newaxis, np.newaxis, :, np.newaxis], w.dtype) # [BkkIO] Scale input feature maps.
+    s = dense_layer(y, fmaps=x.shape[1].value, weight_var=mod_weight_var)  # [BI] Transform incoming W to style.
+    s = apply_bias_act(s, bias_var=mod_bias_var, impl=impl) + 1  # [BI] Add bias (initially 1).
+    ww *= tf.cast(s[:, np.newaxis, np.newaxis, :, np.newaxis], w.dtype)  # [BkkIO] Scale input feature maps.
 
     # Demodulate.
     if demodulate:
-        d = tf.rsqrt(tf.reduce_sum(tf.square(ww), axis=[1,2,3]) + 1e-8) # [BO] Scaling factor.
-        ww *= d[:, np.newaxis, np.newaxis, np.newaxis, :] # [BkkIO] Scale output feature maps.
+        d = tf.rsqrt(tf.reduce_sum(tf.square(ww), axis=[1, 2, 3]) + 1e-8)  # [BO] Scaling factor.
+        ww *= d[:, np.newaxis, np.newaxis, np.newaxis, :]  # [BkkIO] Scale output feature maps.
 
     # Reshape/scale input.
     if fused_modconv:
-        x = tf.reshape(x, [1, -1, x.shape[2], x.shape[3]]) # Fused => reshape minibatch to convolution groups.
+        x = tf.reshape(x, [1, -1, x.shape[2], x.shape[3]])  # Fused => reshape minibatch to convolution groups.
         w = tf.reshape(tf.transpose(ww, [1, 2, 3, 0, 4]), [ww.shape[1], ww.shape[2], ww.shape[3], -1])
     else:
-        x *= tf.cast(s[:, :, np.newaxis, np.newaxis], x.dtype) # [BIhw] Not fused => scale input activations.
+        x *= tf.cast(s[:, :, np.newaxis, np.newaxis], x.dtype)  # [BIhw] Not fused => scale input activations.
 
     # Convolution with optional up/downsampling.
     if up:
@@ -118,54 +124,56 @@ def modulated_conv2d_layer(x, y, fmaps, kernel, up=False, down=False, demodulate
     elif down:
         x = conv_downsample_2d(x, tf.cast(w, x.dtype), data_format='NCHW', k=resample_kernel, impl=impl)
     else:
-        x = tf.nn.conv2d(x, tf.cast(w, x.dtype), data_format='NCHW', strides=[1,1,1,1], padding='SAME')
+        x = tf.nn.conv2d(x, tf.cast(w, x.dtype), data_format='NCHW', strides=[1, 1, 1, 1], padding='SAME')
 
     # Reshape/scale output.
     if fused_modconv:
-        x = tf.reshape(x, [-1, fmaps, x.shape[2], x.shape[3]]) # Fused => reshape convolution groups back to minibatch.
+        x = tf.reshape(x, [-1, fmaps, x.shape[2], x.shape[3]])  # Fused => reshape convolution groups back to minibatch.
     elif demodulate:
-        x *= tf.cast(d[:, :, np.newaxis, np.newaxis], x.dtype) # [BOhw] Not fused => scale output activations.
+        x *= tf.cast(d[:, :, np.newaxis, np.newaxis], x.dtype)  # [BOhw] Not fused => scale output activations.
     return x
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Minibatch standard deviation layer.
+
 
 def minibatch_stddev_layer(x, group_size=4, num_new_features=1):
     group_size = tf.minimum(group_size, tf.shape(x)[0])     # Minibatch must be divisible by (or smaller than) group_size.
     s = x.shape                                             # [NCHW]  Input shape.
-    y = tf.reshape(x, [group_size, -1, num_new_features, s[1]//num_new_features, s[2], s[3]])   # [GMncHW] Split minibatch into M groups of size G. Split channels into n channel groups c.
+    y = tf.reshape(x, [group_size, -1, num_new_features, s[1] // num_new_features, s[2], s[3]])   # [GMncHW] Split minibatch into M groups of size G. Split channels into n channel groups c.
     y = tf.cast(y, tf.float32)                              # [GMncHW] Cast to FP32.
     y -= tf.reduce_mean(y, axis=0, keepdims=True)           # [GMncHW] Subtract mean over group.
     y = tf.reduce_mean(tf.square(y), axis=0)                # [MncHW]  Calc variance over group.
     y = tf.sqrt(y + 1e-8)                                   # [MncHW]  Calc stddev over group.
-    y = tf.reduce_mean(y, axis=[2,3,4], keepdims=True)      # [Mn111]  Take average over fmaps and pixels.
+    y = tf.reduce_mean(y, axis=[2, 3, 4], keepdims=True)      # [Mn111]  Take average over fmaps and pixels.
     y = tf.reduce_mean(y, axis=[2])                         # [Mn11] Split channels into c channel groups
     y = tf.cast(y, x.dtype)                                 # [Mn11]  Cast back to original data type.
     y = tf.tile(y, [group_size, 1, s[2], s[3]])             # [NnHW]  Replicate over group and pixels.
     return tf.concat([x, y], axis=1)                        # [NCHW]  Append as new fmap.
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Main generator network.
 # Composed of two sub-networks (mapping and synthesis) that are defined below.
 # Used in configs B-F (Table 1).
 
+
 def G_main(
-    latents_in,                                         # First input: Latent vectors (Z) [minibatch, latent_size].
-    labels_in,                                          # Second input: Conditioning labels [minibatch].
-    truncation_psi          = None,                     # Style strength multiplier for the truncation trick. None = disable.
-    truncation_cutoff       = None,                     # Number of layers for which to apply the truncation trick. None = disable.
-    truncation_psi_val      = None,                     # Value for truncation_psi to use during validation.
-    truncation_cutoff_val   = None,                     # Value for truncation_cutoff to use during validation.
-    dlatent_avg_beta        = 0.995,                    # Decay for tracking the moving average of W during training. None = disable.
-    style_mixing_prob       = 0.9,                      # Probability of mixing styles during training. None = disable.
-    is_training             = False,                    # Network is under training? Enables and disables specific features.
-    is_validation           = False,                    # Network is under validation? Chooses which value to use for truncation_psi.
-    return_dlatents         = False,                    # Return dlatents in addition to the images?
-    is_template_graph       = False,                    # True = template graph constructed by the Network class, False = actual evaluation.
-    components              = dnnlib.EasyDict(),        # Container for sub-networks. Retained between calls.
-    mapping_func            = 'G_mapping',              # Build func name for the mapping network.
-    synthesis_func          = 'G_synthesis_stylegan2',  # Build func name for the synthesis network.
-    **kwargs):                                          # Arguments for sub-networks (mapping and synthesis).
+        latents_in,                                         # First input: Latent vectors (Z) [minibatch, latent_size].
+        labels_in,                                          # Second input: Conditioning labels [minibatch].
+        truncation_psi=None,                     # Style strength multiplier for the truncation trick. None = disable.
+        truncation_cutoff=None,                     # Number of layers for which to apply the truncation trick. None = disable.
+        truncation_psi_val=None,                     # Value for truncation_psi to use during validation.
+        truncation_cutoff_val=None,                     # Value for truncation_cutoff to use during validation.
+        dlatent_avg_beta=0.995,                    # Decay for tracking the moving average of W during training. None = disable.
+        style_mixing_prob=0.9,                      # Probability of mixing styles during training. None = disable.
+        is_training=False,                    # Network is under training? Enables and disables specific features.
+        is_validation=False,                    # Network is under validation? Chooses which value to use for truncation_psi.
+        return_dlatents=False,                    # Return dlatents in addition to the images?
+        is_template_graph=False,                    # True = template graph constructed by the Network class, False = actual evaluation.
+        components=dnnlib.EasyDict(),        # Container for sub-networks. Retained between calls.
+        mapping_func='G_mapping',              # Build func name for the mapping network.
+        synthesis_func='G_synthesis_stylegan2',  # Build func name for the synthesis network.
+        **kwargs):                                          # Arguments for sub-networks (mapping and synthesis).
 
     # Validate arguments.
     assert not is_training or not is_validation
@@ -244,26 +252,27 @@ def G_main(
         return images_out, dlatents
     return images_out
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # Mapping network.
 # Transforms the input latent code (z) to the disentangled latent code (w).
 # Used in configs B-F (Table 1).
 
+
 def G_mapping(
-    latents_in,                             # First input: Latent vectors (Z) [minibatch, latent_size].
-    labels_in,                              # Second input: label latent vectors [minibatch].
-    latent_size             = 512,          # Latent vector (Z) dimensionality.
-    label_size              = 0,            # Label dimensionality.
-    dlatent_size            = 512,          # Disentangled latent (W) dimensionality.
-    dlatent_broadcast       = None,         # Output disentangled latent (W) as [minibatch, dlatent_size] or [minibatch, dlatent_broadcast, dlatent_size].
-    mapping_layers          = 8,            # Number of mapping layers.
-    mapping_fmaps           = 512,          # Number of activations in the mapping layers.
-    mapping_lrmul           = 0.01,         # Learning rate multiplier for the mapping layers.
-    mapping_nonlinearity    = 'lrelu',      # Activation function: 'relu', 'lrelu', etc.
-    normalize_latents       = True,         # Normalize latent vectors (Z) before feeding them to the mapping layers?
-    dtype                   = 'float32',    # Data type to use for activations and outputs.
-    impl                    = 'cuda',
-    **_kwargs):                             # Ignore unrecognized keyword args.
+        latents_in,                             # First input: Latent vectors (Z) [minibatch, latent_size].
+        labels_in,                              # Second input: label latent vectors [minibatch].
+        latent_size=512,          # Latent vector (Z) dimensionality.
+        label_size=0,            # Label dimensionality.
+        dlatent_size=512,          # Disentangled latent (W) dimensionality.
+        dlatent_broadcast=None,         # Output disentangled latent (W) as [minibatch, dlatent_size] or [minibatch, dlatent_broadcast, dlatent_size].
+        mapping_layers=8,            # Number of mapping layers.
+        mapping_fmaps=512,          # Number of activations in the mapping layers.
+        mapping_lrmul=0.01,         # Learning rate multiplier for the mapping layers.
+        mapping_nonlinearity='lrelu',      # Activation function: 'relu', 'lrelu', etc.
+        normalize_latents=True,         # Normalize latent vectors (Z) before feeding them to the mapping layers?
+        dtype='float32',    # Data type to use for activations and outputs.
+        impl='cuda',
+        **_kwargs):                             # Ignore unrecognized keyword args.
 
     act = mapping_nonlinearity
 
@@ -301,28 +310,29 @@ def G_mapping(
     assert x.dtype == tf.as_dtype(dtype)
     return tf.identity(x, name='dlatents_out')
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # StyleGAN2 synthesis network (Figure 7).
 # Implements skip connections and residual nets (Figure 7), but no progressive growing.
 # Used in configs E-F (Table 1).
 
+
 def G_synthesis_stylegan2(
-    dlatents_in,                        # Input: Disentangled latents (W) [minibatch, num_layers, dlatent_size].
-    dlatent_size        = 512,          # Disentangled latent (W) dimensionality.
-    num_channels        = 3,            # Number of output color channels.
-    resolution          = 1024,         # Output resolution.
-    fmap_base           = 16384,        # Overall multiplier for the number of feature maps.
-    fmap_decay          = 1.0,          # log2 feature map reduction when doubling the resolution.
-    fmap_min            = 1,            # Minimum number of feature maps in any layer.
-    fmap_max            = 512,          # Maximum number of feature maps in any layer.
-    randomize_noise     = True,         # True = randomize noise inputs every time (non-deterministic), False = read noise inputs from variables.
-    architecture        = 'skip',       # Architecture: 'orig', 'skip', 'resnet'.
-    nonlinearity        = 'lrelu',      # Activation function: 'relu', 'lrelu', etc.
-    dtype               = 'float32',    # Data type to use for activations and outputs.
-    resample_kernel     = [1,3,3,1],    # Low-pass filter to apply when resampling activations. None = no filtering.
-    fused_modconv       = True,         # Implement modulated_conv2d_layer() as a single fused op?
-    impl                = 'cuda',
-    **_kwargs):                         # Ignore unrecognized keyword args.
+        dlatents_in,                        # Input: Disentangled latents (W) [minibatch, num_layers, dlatent_size].
+        dlatent_size=512,          # Disentangled latent (W) dimensionality.
+        num_channels=3,            # Number of output color channels.
+        resolution=1024,         # Output resolution.
+        fmap_base=16384,        # Overall multiplier for the number of feature maps.
+        fmap_decay=1.0,          # log2 feature map reduction when doubling the resolution.
+        fmap_min=1,            # Minimum number of feature maps in any layer.
+        fmap_max=512,          # Maximum number of feature maps in any layer.
+        randomize_noise=True,         # True = randomize noise inputs every time (non-deterministic), False = read noise inputs from variables.
+        architecture='skip',       # Architecture: 'orig', 'skip', 'resnet'.
+        nonlinearity='lrelu',      # Activation function: 'relu', 'lrelu', etc.
+        dtype='float32',    # Data type to use for activations and outputs.
+        resample_kernel=[1, 3, 3, 1],    # Low-pass filter to apply when resampling activations. None = no filtering.
+        fused_modconv=True,         # Implement modulated_conv2d_layer() as a single fused op?
+        impl='cuda',
+        **_kwargs):                         # Ignore unrecognized keyword args.
 
     resolution_log2 = int(np.ceil(np.log2(resolution)))
     pad = (2 ** resolution_log2 - resolution) // 2
@@ -355,23 +365,25 @@ def G_synthesis_stylegan2(
         return apply_bias_act(x, act=act, impl=impl)
 
     # Building blocks for main layers.
-    def block(x, res): # res = 3..resolution_log2
+    def block(x, res):  # res = 3..resolution_log2
         t = x
         with tf.variable_scope('Conv0_up'):
-            x = layer(x, layer_idx=res*2-5, fmaps=nf(res-1), kernel=3, up=True)
+            x = layer(x, layer_idx=res * 2 - 5, fmaps=nf(res - 1), kernel=3, up=True)
         with tf.variable_scope('Conv1'):
-            x = layer(x, layer_idx=res*2-4, fmaps=nf(res-1), kernel=3)
+            x = layer(x, layer_idx=res * 2 - 4, fmaps=nf(res - 1), kernel=3)
         if architecture == 'resnet':
             with tf.variable_scope('Skip'):
-                t = conv2d_layer(t, fmaps=nf(res-1), kernel=1, up=True, resample_kernel=resample_kernel, impl=impl)
+                t = conv2d_layer(t, fmaps=nf(res - 1), kernel=1, up=True, resample_kernel=resample_kernel, impl=impl)
                 x = (x + t) * (1 / np.sqrt(2))
         return x
+
     def upsample(y):
         with tf.variable_scope('Upsample'):
             return upsample_2d(y, k=resample_kernel, impl=impl)
-    def torgb(x, y, res): # res = 2..resolution_log2
+
+    def torgb(x, y, res):  # res = 2..resolution_log2
         with tf.variable_scope('ToRGB'):
-            t = apply_bias_act(modulated_conv2d_layer(x, dlatents_in[:, res*2-3], fmaps=num_channels, kernel=1, demodulate=False, fused_modconv=fused_modconv, impl=impl), impl=impl)
+            t = apply_bias_act(modulated_conv2d_layer(x, dlatents_in[:, res * 2 - 3], fmaps=num_channels, kernel=1, demodulate=False, fused_modconv=fused_modconv, impl=impl), impl=impl)
             return t if y is None else y + t
 
     # Early layers.
@@ -394,36 +406,37 @@ def G_synthesis_stylegan2(
             if architecture == 'skip' or res == resolution_log2:
                 y = torgb(x, y, res)
     images_out = y
-    
+
     if pad > 0:
         images_out = images_out[:, :, pad: -pad, pad: -pad]
 
     assert images_out.dtype == tf.as_dtype(dtype)
     return tf.identity(images_out, name='images_out')
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # StyleGAN2 discriminator (Figure 7).
 # Implements skip connections and residual nets (Figure 7), but no progressive growing.
 # Used in configs E-F (Table 1).
 
+
 def D_stylegan2(
-    images_in,                          # First input: Images [minibatch, channel, height, width].
-    num_channels        = 3,            # Number of input color channels. Overridden based on dataset.
-    label_size          = 0,            # Label dimensionality.
-    resolution          = 1024,         # Input resolution. Overridden based on dataset.
-    fmap_base           = 16384,        # Overall multiplier for the number of feature maps.
-    fmap_decay          = 1.0,          # log2 feature map reduction when doubling the resolution.
-    fmap_min            = 1,            # Minimum number of feature maps in any layer.
-    fmap_max            = 512,          # Maximum number of feature maps in any layer.
-    architecture        = 'resnet',     # Architecture: 'orig', 'skip', 'resnet'.
-    nonlinearity        = 'lrelu',      # Activation function: 'relu', 'lrelu', etc.
-    mbstd_group_size    = 4,            # Group size for the minibatch standard deviation layer, 0 = disable.
-    mbstd_num_features  = 1,            # Number of features for the minibatch standard deviation layer.
-    dtype               = 'float32',    # Data type to use for activations and outputs.
-    resample_kernel     = [1,3,3,1],    # Low-pass filter to apply when resampling activations. None = no filtering.
-    impl                = 'cuda',
-    avg_pooling         = False,
-    **_kwargs):                         # Ignore unrecognized keyword args.
+        images_in,                          # First input: Images [minibatch, channel, height, width].
+        num_channels=3,            # Number of input color channels. Overridden based on dataset.
+        label_size=0,            # Label dimensionality.
+        resolution=1024,         # Input resolution. Overridden based on dataset.
+        fmap_base=16384,        # Overall multiplier for the number of feature maps.
+        fmap_decay=1.0,          # log2 feature map reduction when doubling the resolution.
+        fmap_min=1,            # Minimum number of feature maps in any layer.
+        fmap_max=512,          # Maximum number of feature maps in any layer.
+        architecture='resnet',     # Architecture: 'orig', 'skip', 'resnet'.
+        nonlinearity='lrelu',      # Activation function: 'relu', 'lrelu', etc.
+        mbstd_group_size=4,            # Group size for the minibatch standard deviation layer, 0 = disable.
+        mbstd_num_features=1,            # Number of features for the minibatch standard deviation layer.
+        dtype='float32',    # Data type to use for activations and outputs.
+        resample_kernel=[1, 3, 3, 1],    # Low-pass filter to apply when resampling activations. None = no filtering.
+        impl='cuda',
+        avg_pooling=False,
+        **_kwargs):                         # Ignore unrecognized keyword args.
 
     resolution_log2 = int(np.ceil(np.log2(resolution)))
     pad = (2 ** resolution_log2 - resolution) // 2
@@ -435,21 +448,23 @@ def D_stylegan2(
     images_in = tf.cast(images_in, dtype)
 
     # Building blocks for main layers.
-    def fromrgb(x, y, res): # res = 2..resolution_log2
+    def fromrgb(x, y, res):  # res = 2..resolution_log2
         with tf.variable_scope('FromRGB'):
-            t = apply_bias_act(conv2d_layer(y, fmaps=nf(res-1), kernel=1, impl=impl), act=act, impl=impl)
+            t = apply_bias_act(conv2d_layer(y, fmaps=nf(res - 1), kernel=1, impl=impl), act=act, impl=impl)
             return t if x is None else x + t
-    def block(x, res): # res = 2..resolution_log2
+
+    def block(x, res):  # res = 2..resolution_log2
         t = x
         with tf.variable_scope('Conv0'):
-            x = apply_bias_act(conv2d_layer(x, fmaps=nf(res-1), kernel=3, impl=impl), act=act, impl=impl)
+            x = apply_bias_act(conv2d_layer(x, fmaps=nf(res - 1), kernel=3, impl=impl), act=act, impl=impl)
         with tf.variable_scope('Conv1_down'):
-            x = apply_bias_act(conv2d_layer(x, fmaps=nf(res-2), kernel=3, down=True, resample_kernel=resample_kernel, impl=impl), act=act, impl=impl)
+            x = apply_bias_act(conv2d_layer(x, fmaps=nf(res - 2), kernel=3, down=True, resample_kernel=resample_kernel, impl=impl), act=act, impl=impl)
         if architecture == 'resnet':
             with tf.variable_scope('Skip'):
-                t = conv2d_layer(t, fmaps=nf(res-2), kernel=1, down=True, resample_kernel=resample_kernel, impl=impl)
+                t = conv2d_layer(t, fmaps=nf(res - 2), kernel=1, down=True, resample_kernel=resample_kernel, impl=impl)
                 x = (x + t) * (1 / np.sqrt(2))
         return x
+
     def downsample(y):
         with tf.variable_scope('Downsample'):
             return downsample_2d(y, k=resample_kernel, impl=impl)
@@ -475,7 +490,7 @@ def D_stylegan2(
         with tf.variable_scope('Conv'):
             x = apply_bias_act(conv2d_layer(x, fmaps=nf(1), kernel=3, impl=impl), act=act, impl=impl)
         if avg_pooling:
-            x = tf.reduce_mean(x, axis=[2,3])
+            x = tf.reduce_mean(x, axis=[2, 3])
         with tf.variable_scope('Dense0'):
             x = apply_bias_act(dense_layer(x, fmaps=nf(0)), act=act, impl=impl)
 
@@ -489,4 +504,4 @@ def D_stylegan2(
     scores_out = tf.identity(scores_out, name='scores_out')
     return scores_out
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
