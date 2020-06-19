@@ -1,6 +1,8 @@
 # Data-Efficient GANs with DiffAugment
 
-**[NOTE]** Our DiffAugment-biggan repo will be coming!
+**[NOTE]** Our DiffAugment-biggan repo is coming!
+
+This repository contains our implementation of differentiable augmentation in both PyTorch and Tensorflow. It can be used to significantly improve data efficiency of GANs training. We have provided the training code DiffAugment+StyleGAN2 (Tensorflow).
 
 ![few_shot-comparison](imgs/few_shot-comparison.jpg)
 
@@ -10,13 +12,11 @@
 
 *Unconditional generation results on CIFAR-10. StyleGAN2’s performance drastically degrades given less training data. With DiffAugment, we are able to roughly match its FID and outperform its Inception Score (IS) using only **20%** training data.*
 
-The performance of generative adversarial networks (GANs) heavily deteriorates given a limited amount of training data. This is mainly because the discriminator is memorizing the exact training set. To combat it, we propose DiffAugment, a simple method that improves the data efficiency of GANs by imposing various types of differentiable augmentations on both real and fake samples. With DiffAugment, we achieve a state-of-the-art FID of 6.80 with an IS of 100.8 on ImageNet 128×128; using only 20% training data, we can match the top performance on CIFAR-10 and CIFAR-100. Furthermore, our method can generate high-fidelity images using only 100 images without pre-training, while being on par with existing transfer learning algorithms.
-
-Differentiable Augmentation for Data-Efficient GAN Training
-
+Differentiable Augmentation for Data-Efficient GAN Training<br>
 [Shengyu Zhao](https://scholar.google.com/citations?user=gLCdw70AAAAJ), [Zhijian Liu](http://zhijianliu.com/), [Ji Lin](http://linji.me/), [Jun-Yan Zhu](https://people.csail.mit.edu/junyanz/), and [Song Han](https://songhan.mit.edu/)<br>
 MIT, Tsinghua, Adobe Research<br>
 [arXiv](https://arxiv.org/pdf/2006.10738.pdf)
+
 
 ## Overview
 
