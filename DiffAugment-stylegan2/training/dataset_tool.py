@@ -102,7 +102,7 @@ class TFRecordExporter:
 
 
 def create_from_images(dataset, resolution, tfrecord_dir=None, shuffle=True):
-    if dataset in ['100-shot-obama', '100-shot-grumpy_cat', '100-shot-panda']:
+    if dataset in ['100-shot-obama', '100-shot-grumpy_cat', '100-shot-panda', 'AnimalFace-cat', 'AnimalFace-dog']:
         image_dir = 'datasets/{}'.format(dataset)
         if not glob.glob(os.path.join(image_dir, '*.tfrecords')):
             try:

@@ -103,7 +103,7 @@ def run_eval(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size,
     print('Evaluating metrics "%s" for "%s"...' % (','.join(metrics), resume))
     tflib.init_tf()
     resume = pretrained_networks.get_path_or_url(resume)
-    dataset_args = dnnlib.EasyDict(tfrecord_dir=dataset, shuffle_mb=0, num_samples=num_samples or total_samples)
+    dataset_args = dnnlib.EasyDict(tfrecord_dir=dataset, num_samples=num_samples or total_samples, resolution=resolution, from_tfrecords=True)
     metric_group = metric_base.MetricGroup([metric_defaults[metric] for metric in metrics], num_repeats=num_repeats)
     metric_group.run(resume, dataset_args=dataset_args, num_gpus=num_gpus)
 
@@ -156,8 +156,6 @@ def main():
     parser.add_argument('--eval', help='Evalulate mode?', action='store_true')
 
     args = parser.parse_args()
-
-    assert args.dataset in ['100-shot-obama', '100-shot-grumpy_cat', '100-shot-panda'] or os.path.isdir(args.dataset)
 
     for metric in args.metrics:
         if metric not in metric_defaults:
