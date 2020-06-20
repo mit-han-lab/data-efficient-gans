@@ -2,7 +2,7 @@
 
 **[NOTE]** Our DiffAugment-biggan repo is coming!
 
-This repository contains our implementation of differentiable augmentation in both PyTorch and Tensorflow. It can be used to significantly improve data efficiency of GANs training. We have provided the training code DiffAugment+StyleGAN2 (Tensorflow).
+This repository contains our implementation of Differentiable Augmentation (DiffAugment) in both PyTorch and Tensorflow. It can be used to significantly improve data efficiency of GANs training. We have provided the training code of DiffAugment-StyleGAN2 (Tensorflow).
 
 ![few_shot-comparison](imgs/few_shot-comparison.jpg)
 
@@ -14,7 +14,7 @@ This repository contains our implementation of differentiable augmentation in bo
 
 Differentiable Augmentation for Data-Efficient GAN Training<br>
 [Shengyu Zhao](https://scholar.google.com/citations?user=gLCdw70AAAAJ), [Zhijian Liu](http://zhijianliu.com/), [Ji Lin](http://linji.me/), [Jun-Yan Zhu](https://people.csail.mit.edu/junyanz/), and [Song Han](https://songhan.mit.edu/)<br>
-MIT, Tsinghua, Adobe Research<br>
+MIT, Tsinghua University, Adobe Research<br>
 [arXiv](https://arxiv.org/pdf/2006.10738.pdf)
 
 
@@ -30,7 +30,7 @@ To run *StyleGAN2 + DiffAugment* for unconditional generation on CIFAR and few-s
 
 ## Using DiffAugment for Your Own Training
 
-To help you use DiffAugment in your own codebase, we provide portable DiffAugment operations of both TensorFlow and PyTorch versions in [DiffAugment_tf.py](https://github.com/mit-han-lab/data-efficient-gans/blob/master/DiffAugment_tf.py) and [DiffAugment_pytorch.py](https://github.com/mit-han-lab/data-efficient-gans/blob/master/DiffAugment_pytorch.py). Generally, DiffAugment can be easily applied in any model by substituting every *D(x)* with *D(T(x))*, where *x* can be real images or fake images, *D* is the discriminator, and *T* is the DiffAugment operation. For example,
+To help you use DiffAugment in your own codebase, we provide portable DiffAugment operations of both TensorFlow and PyTorch versions in [DiffAugment_tf.py](https://github.com/mit-han-lab/data-efficient-gans/blob/master/DiffAugment_tf.py) and [DiffAugment_pytorch.py](https://github.com/mit-han-lab/data-efficient-gans/blob/master/DiffAugment_pytorch.py). Generally, DiffAugment can be easily adopted in any model by substituting every *D(x)* with *D(T(x))*, where *x* can be real images or fake images, *D* is the discriminator, and *T* is the DiffAugment operation. For example,
 
 ```
 from DiffAugment_pytorch import DiffAugment
@@ -51,7 +51,7 @@ fake_scores = Discriminator(DiffAugment(fakes, policy=policy))
 ```
 
 ## Citation
-If you use this code for your research, please cite our paper.
+If you use this code in your research, please cite our paper:
 ```
 @article{zhao2020diffaugment,
   title={Differentiable Augmentation for Data-Efficient GAN Training},
