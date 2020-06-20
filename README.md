@@ -2,11 +2,11 @@
 
 **[NOTE]** Our DiffAugment-biggan repo is coming!
 
-This repository contains our implementation of Differentiable Augmentation (DiffAugment) in both PyTorch and Tensorflow. It can be used to significantly improve data efficiency of GANs training. We have provided the training code of DiffAugment-StyleGAN2 (Tensorflow).
+This repository contains our implementation of Differentiable Augmentation (DiffAugment) in both PyTorch and Tensorflow. It can be used to significantly improve the data efficiency for GAN training. We have provided the training code of DiffAugment-StyleGAN2 (Tensorflow).
 
 ![few_shot-comparison](imgs/few_shot-comparison.jpg)
 
-*Few-shot generation without pre-training. With DiffAugment, our model can generate high-fidelity images using only 100 Obama portraits (top) from our collected 100-shot datasets, 160 cats (middle) or 389 dogs (bottom) from the AnimalFace dataset at 256×256 resolution.*
+*Few-shot generation without pre-training. With DiffAugment, our model can generate high-fidelity images using only 100 Obama portraits, grumpy cats, or pandas from our collected 100-shot datasets, 160 cats or 389 dogs from the AnimalFace dataset at 256×256 resolution.*
 
 ![cifar10-results](imgs/cifar10-results.jpg)
 
