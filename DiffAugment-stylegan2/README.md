@@ -9,6 +9,8 @@ This repo is implemented upon and has the same dependencies as the official [Sty
 
 ## Pre-Trained Models and Evaluation
 
+### CIFAR-10 and CIFAR-100
+
 To evaluate a model on CIFAR-10 or CIFAR-100, run the following command:
 
 ```bash
@@ -17,7 +19,7 @@ python run_cifar.py --dataset=WHICH_DATASET --resume=WHICH_MODEL --eval
 
 Here, `WHICH_DATASET` specifies either `cifar10` or `cifar100` (default to `cifar10`); `WHICH_MODEL` specifies the path of a checkpoint, or a pre-trained model in the following list, which will be automatically downloaded:
 
-| Model name | Dataset | IS | FID |
+| Model name | Dataset | is10k | fid10k |
 | --- | --- | --- | --- |
 | `mit-han-lab:stylegan2-cifar10.pkl` | `cifar10` | 9.18 | 11.07 |
 | `mit-han-lab:DiffAugment-stylegan2-cifar10.pkl` | `cifar10` | **9.40** | **9.89** |
@@ -32,7 +34,9 @@ Here, `WHICH_DATASET` specifies either `cifar10` or `cifar100` (default to `cifa
 | `mit-han-lab:stylegan2-cifar100-0.1.pkl` | `cifar100` (10% data) | 7.01 | 45.87 |
 | `mit-han-lab:DiffAugment-stylegan2-cifar100-0.1.pkl` | `cifar100` (10% data) | **9.06** | **20.75** |
 
-The evaluation results of the pre-trained models should be close to these numbers.
+The evaluation results of the pre-trained models should be close to these numbers. Specify `--num-repeats=REPEATS` to compute means and standard deviations over multiple evaluation runs. A standard deviation of less than 1% relatively is expected.
+
+### Few-Shot Generation
 
 To evaluate a model on a few-shot dataset, run the following command:
 
@@ -40,8 +44,8 @@ To evaluate a model on a few-shot dataset, run the following command:
 python run_few_shot.py --dataset=WHICH_DATASET --resume=WHICH_MODEL --eval
 ```
 
-Here, `WHICH_DATASET` specifies the folder containing the training images, or one of pre-defined datasets, including `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `AnimalFace-cat`, and `AnimalFace-dog`, which will be automatically downloaded. `WHICH_MODEL` specifies the path of a checkpoint, or a pre-trained model in the following list, which will be automatically downloaded:
-| Model name | Dataset | FID |
+Here, `WHICH_DATASET` specifies the folder containing the training images, or one of our pre-defined datasets, including `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `AnimalFace-cat`, and `AnimalFace-dog`, which will be automatically downloaded. `WHICH_MODEL` specifies the path of a checkpoint, or a pre-trained model in the following list, which will be automatically downloaded:
+| Model name | Dataset | fid5k-train |
 | --- | --- | --- |
 | `mit-han-lab:stylegan2-100-shot-obama.pkl` | `100-shot-obama` | 89.18 |
 | `mit-han-lab:DiffAugment-stylegan2-100-shot-obama.pkl` | `100-shot-obama` | **54.39** |
