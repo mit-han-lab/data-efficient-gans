@@ -86,7 +86,7 @@ To run the few-shot generation experiments on the 100-shot datasets:
 python run_few_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout
 ```
 
-or the following command to run on the AnimalFace datasets (with a smaller $\gamma$ and a longer training length):
+or the following command to run on the AnimalFace datasets (with a smaller `gamma​` and a longer training length):
 
 ```bash
 python run_few_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout --gamma=1 --total-kimg=600
