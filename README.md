@@ -4,11 +4,12 @@
 
 This repository contains our implementation of Differentiable Augmentation (DiffAugment) in both PyTorch and Tensorflow. It can be used to significantly improve the data efficiency for GAN training. We have provided the training code of [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) (Tensorflow).
 
-![few_shot-comparison](imgs/few_shot-comparison.jpg)
+<img src="imgs/few_shot-comparison.jpg" width="1000px"/>
+
 
 *Few-shot generation without pre-training. With DiffAugment, our model can generate high-fidelity images using only 100 Obama portraits, grumpy cats, or pandas from our collected 100-shot datasets, 160 cats or 389 dogs from the AnimalFace dataset at 256×256 resolution.*
 
-![cifar10-results](imgs/cifar10-results.jpg)
+<img src="imgs/cifar10-results.jpg" width="1000px"/>
 
 *Unconditional generation results on CIFAR-10. StyleGAN2’s performance drastically degrades given less training data. With DiffAugment, we are able to roughly match its FID and outperform its Inception Score (IS) using only **20%** training data.*
 
@@ -19,8 +20,8 @@ MIT, Tsinghua University, Adobe Research<br>
 
 
 ## Overview
+<img src="imgs/method.jpg" width="1000px"/>
 
-![method](imgs/method.jpg)
 
 *Overview of DiffAugment for updating D (left) and G (right). DiffAugment applies the augmentation T to both the real sample x and the generated output G(z). When we update G, gradients need to be back-propagated through T, which requires T to be differentiable w.r.t. the input.*
 
