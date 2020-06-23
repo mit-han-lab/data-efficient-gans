@@ -1,5 +1,6 @@
 # Data-Efficient GANs with DiffAugment
 
+#### [arXiv preprint](https://arxiv.org/pdf/2006.10738)
 **[NOTE]** Our DiffAugment-BigGAN PyTorch repo is coming!
 
 This repository contains our implementation of Differentiable Augmentation (DiffAugment) in both PyTorch and Tensorflow. It can be used to significantly improve the data efficiency for GAN training. We have provided the Tensorflow code of [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2).
