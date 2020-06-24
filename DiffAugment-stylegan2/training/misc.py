@@ -33,6 +33,10 @@ def save_pkl(obj, filename):
     with open(filename, 'wb') as file:
         pickle.dump(obj, file, protocol=pickle.HIGHEST_PROTOCOL)
 
+
+def get_path_or_url(path_or_url):
+    return path_or_url.replace('mit-han-lab:', 'https://hanlab.mit.edu/projects/data-efficient-gans/models/')
+
 # ----------------------------------------------------------------------------
 # Image utils.
 

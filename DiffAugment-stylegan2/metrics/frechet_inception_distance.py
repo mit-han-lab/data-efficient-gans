@@ -18,10 +18,9 @@ from training import misc
 #----------------------------------------------------------------------------
 
 class FID(metric_base.MetricBase):
-    def __init__(self, num_images, minibatch_per_gpu, split='test', num_real_images=None, mirror_augment=False, num_repeats=1, **kwargs):
+    def __init__(self, num_images, minibatch_per_gpu, num_real_images=None, mirror_augment=False, num_repeats=1, **kwargs):
         super().__init__(**kwargs)
         self.num_images = num_images
-        self.split = split
         self.num_real_images = num_real_images
         self.num_repeats = num_repeats
         self.mirror_augment = mirror_augment
@@ -29,7 +28,7 @@ class FID(metric_base.MetricBase):
 
     def _evaluate(self, Gs, Gs_kwargs, num_gpus):
         if self.num_real_images is None:
-            self.num_real_images = self._get_dataset_obj(split=self.split).num_samples
+            self.num_real_images = self._get_dataset_obj().num_samples
         if self.num_images is None:
             self.num_images = self.num_real_images
         num_channels = Gs.output_shape[1]
@@ -37,13 +36,13 @@ class FID(metric_base.MetricBase):
         inception = misc.load_pkl('http://d36zk2xti64re0.cloudfront.net/stylegan1/networks/metrics/inception_v3_features.pkl')
 
         # Calculate statistics for reals.
-        cache_file = self._get_cache_file_for_reals(prefix='fid', num_images=self.num_real_images, split=self.split, mirror_augment=self.mirror_augment)
+        cache_file = self._get_cache_file_for_reals(prefix='fid', num_images=self.num_real_images, mirror_augment=self.mirror_augment)
         os.makedirs(os.path.dirname(cache_file), exist_ok=True)
         if os.path.isfile(cache_file):
             mu_real, sigma_real = misc.load_pkl(cache_file)
         else:
             activations = np.empty([self.num_real_images, inception.output_shape[1]], dtype=np.float32)
-            for idx, images in enumerate(self._iterate_reals(minibatch_size=minibatch_size, split=self.split, mirror_augment=self.mirror_augment)):
+            for idx, images in enumerate(self._iterate_reals(minibatch_size=minibatch_size, mirror_augment=self.mirror_augment)):
                 begin = idx * minibatch_size
                 end = min(begin + minibatch_size, self.num_real_images)
                 images = images[:end-begin]
@@ -63,7 +62,7 @@ class FID(metric_base.MetricBase):
                 Gs_clone = Gs.clone()
                 inception_clone = inception.clone()
                 latents = tf.random_normal([self.minibatch_per_gpu] + Gs_clone.input_shape[1:])
-                labels = self._get_random_labels_tf(self.minibatch_per_gpu, split=self.split)
+                labels = self._get_random_labels_tf(self.minibatch_per_gpu)
                 images = Gs_clone.get_output_for(latents, labels, **Gs_kwargs)
                 if num_channels == 1:
                     images = tf.repeat(images, 3, axis=1)

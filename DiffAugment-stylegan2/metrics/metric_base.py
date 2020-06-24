@@ -21,10 +21,11 @@ from training import dataset
 # Base class for metrics.
 
 class MetricBase:
-    def __init__(self, name, cache_dir='.stylegan2-cache'):
+    def __init__(self, name, split='test', cache_dir='.stylegan2-cache'):
         self.name = name
+        self.split = split
         self._cache_dir = cache_dir
-        self._dataset_objs = {}
+        self._dataset_obj = None
         self._progress_lo = None
         self._progress_hi = None
         self._progress_max = None
@@ -36,13 +37,12 @@ class MetricBase:
         self._reset()
 
     def _reset(self, network_pkl=None, run_dir=None, data_dir=None, dataset_args=None, mirror_augment=None):
-        for dataset_obj in self._dataset_objs.values():
-            dataset_obj.close()
+        if self._dataset_obj is not None:
+            self._dataset_obj.close()
 
         self._network_pkl = network_pkl
         self._data_dir = data_dir
         self._dataset_args = dataset_args
-        self._dataset_objs = {}
         self._eval_time = 0
         self._results = []
 
@@ -61,6 +61,7 @@ class MetricBase:
         self._reset(network_pkl=network_pkl, run_dir=run_dir, data_dir=data_dir, dataset_args=dataset_args, mirror_augment=mirror_augment)
         time_begin = time.time()
         with tf.Graph().as_default(), tflib.create_session(tf_config).as_default(): # pylint: disable=not-context-manager
+            self._get_dataset_obj()
             self._report_progress(0, 1)
             resume_networks = misc.load_pkl(self._network_pkl)
             _G, _D, Gs = resume_networks
@@ -111,17 +112,17 @@ class MetricBase:
         val = self._progress_lo + (pcur / pmax) * (self._progress_hi - self._progress_lo)
         dnnlib.RunContext.get().update(status_str, int(val), self._progress_max)
 
-    def _get_cache_file_for_reals(self, prefix, num_images, split='test', extension='pkl', mirror_augment=False):
-        dataset_name = self._get_dataset_obj(split=split).name
-        return os.path.join(self._cache_dir, '{}-{}-{}-{}{}.{}'.format(prefix, dataset_name, split, num_images, '-flip' if mirror_augment else '', extension))
+    def _get_cache_file_for_reals(self, prefix, num_images, extension='pkl', mirror_augment=False):
+        dataset_name = self._get_dataset_obj().name
+        return os.path.join(self._cache_dir, '{}-{}-{}-{}{}.{}'.format(prefix, dataset_name, self.split, num_images, '-flip' if mirror_augment else '', extension))
 
-    def _get_dataset_obj(self, split='test'):
-        if split not in self._dataset_objs:
-            self._dataset_objs[split] = dataset.load_dataset(data_dir=self._data_dir, split=split, **self._dataset_args)
-        return self._dataset_objs[split]
+    def _get_dataset_obj(self):
+        if self._dataset_obj is None:
+            self._dataset_obj = dataset.load_dataset(data_dir=self._data_dir, split=self.split, **self._dataset_args)
+        return self._dataset_obj
 
-    def _iterate_reals(self, minibatch_size, split='test', return_label=False, iterate_once=False, num_samples=None, mirror_augment=False):
-        dataset_obj = self._get_dataset_obj(split=split)
+    def _iterate_reals(self, minibatch_size, return_label=False, iterate_once=False, num_samples=None, mirror_augment=False):
+        dataset_obj = self._get_dataset_obj()
         if iterate_once:
             assert dataset_obj.num_samples
             num_samples = dataset_obj.num_samples
@@ -141,8 +142,8 @@ class MetricBase:
                 break
             begin = end
 
-    def _get_random_labels_tf(self, minibatch_size, split='test'):
-        return self._get_dataset_obj(split=split).get_random_labels_tf(minibatch_size)
+    def _get_random_labels_tf(self, minibatch_size):
+        return self._get_dataset_obj().get_random_labels_tf(minibatch_size)
 
 #----------------------------------------------------------------------------
 # Group of multiple metrics.

@@ -17,6 +17,7 @@ import pretrained_networks
 from metrics import metric_base
 from metrics.metric_defaults import metric_defaults
 from training import dataset_tool
+from training import misc
 
 # ----------------------------------------------------------------------------
 
@@ -102,7 +103,7 @@ def run_eval(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size,
     dataset, total_samples = dataset_tool.create_from_images(dataset, resolution)
     print('Evaluating metrics "%s" for "%s"...' % (','.join(metrics), resume))
     tflib.init_tf()
-    resume = pretrained_networks.get_path_or_url(resume)
+    resume = misc.get_path_or_url(resume)
     dataset_args = dnnlib.EasyDict(tfrecord_dir=dataset, num_samples=num_samples or total_samples, resolution=resolution, from_tfrecords=True)
     metric_group = metric_base.MetricGroup([metric_defaults[metric] for metric in metrics], num_repeats=num_repeats)
     metric_group.run(resume, dataset_args=dataset_args, num_gpus=num_gpus)

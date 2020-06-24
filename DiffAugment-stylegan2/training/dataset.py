@@ -117,7 +117,7 @@ class TFRecordDataset:
                 self.label_size = 0
             if self.num_samples is None:
                 self.num_samples = info.splits[split].num_examples
-            tfr_shape = [int(dset.output_shapes['image'][d]) for d in [2, 0, 1]]
+            tfr_shape = [int(tf.compat.v1.data.get_output_shapes(dset)['image'][d]) for d in [2, 0, 1]]
 
         self.resolution = max(tfr_shape[1], tfr_shape[2])
         if resolution is not None and resolution != self.resolution:
@@ -150,7 +150,10 @@ class TFRecordDataset:
             dset = dset.batch(self._tf_minibatch_in)
             self._tf_dataset = dset
 
-            self._tf_iterator = tf.data.Iterator.from_structure(self._tf_dataset.output_types, self._tf_dataset.output_shapes)
+            self._tf_iterator = tf.data.Iterator.from_structure(
+                tf.compat.v1.data.get_output_types(self._tf_dataset),
+                tf.compat.v1.data.get_output_shapes(self._tf_dataset),
+            )
             self._tf_init_op = self._tf_iterator.make_initializer(self._tf_dataset)
 
     def close(self):

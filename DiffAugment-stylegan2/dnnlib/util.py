@@ -357,7 +357,10 @@ def open_url(url: str, cache_dir: str = None, num_attempts: int = 10, verbose: b
     if cache_dir is not None:
         cache_files = glob.glob(os.path.join(cache_dir, url_md5 + "_*"))
         if len(cache_files) == 1:
-            return open(cache_files[0], "rb")
+            if return_path:
+                return cache_files[0]
+            else:
+                return open(cache_files[0], "rb")
 
     # Download.
     url_name = None
@@ -405,7 +408,6 @@ def open_url(url: str, cache_dir: str = None, num_attempts: int = 10, verbose: b
         with open(temp_file, "wb") as f:
             f.write(url_data)
         os.replace(temp_file, cache_file) # atomic
-
         if return_path:
             return cache_file
 
