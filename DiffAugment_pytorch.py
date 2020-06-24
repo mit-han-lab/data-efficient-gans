@@ -9,12 +9,13 @@ import torch.nn.functional as F
 def DiffAugment(x, policy='', channels_first=True):
     if policy:
         if not channels_first:
-            x = x.permute(0, 3, 1, 2)
+            x = x.permute(0, 3, 1, 2).contiguous()
+        x = x.contiguous()
         for p in policy.split(','):
             for f in AUGMENT_FNS[p]:
                 x = f(x)
         if not channels_first:
-            x = x.permute(0, 2, 3, 1)
+            x = x.permute(0, 2, 3, 1).contiguous()
     return x
 
 
@@ -47,7 +48,7 @@ def rand_translation(x, ratio=(1, 8)):
     grid_x = torch.clamp(grid_x + translation_x + 1, 0, x.size(2) + 1)
     grid_y = torch.clamp(grid_y + translation_y + 1, 0, x.size(3) + 1)
     x_pad = F.pad(x, [1, 1, 1, 1, 0, 0, 0, 0])
-    x = x_pad[grid_batch, :, grid_x, grid_y].permute(0, 3, 1, 2)
+    x = x_pad[grid_batch, :, grid_x, grid_y].permute(0, 3, 1, 2).contiguous()
     return x
 
 
