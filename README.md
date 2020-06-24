@@ -1,9 +1,10 @@
 # Data-Efficient GANs with DiffAugment
 
 #### [arXiv preprint](https://arxiv.org/pdf/2006.10738)
-**[NOTE]** Our DiffAugment-BigGAN PyTorch repo is coming!
 
-This repository contains our implementation of Differentiable Augmentation (DiffAugment) in both PyTorch and Tensorflow. It can be used to significantly improve the data efficiency for GAN training. We have provided the Tensorflow code of [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2).
+**[NEW!]** Our [DiffAugment-biggan-cifar](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-cifar) PyTorch repo is released!
+
+This repository contains our implementation of Differentiable Augmentation (DiffAugment) in both PyTorch and Tensorflow. It can be used to significantly improve the data efficiency for GAN training. We have provided the Tensorflow code of [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) and the PyTorch code of [DiffAugment-biggan-cifar](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-cifar). Our DiffAugment-biggan-imagenet repo (for TPU training) is coming!
 
 <img src="imgs/few_shot-comparison.jpg" width="1000px"/>
 
@@ -29,6 +30,10 @@ MIT, Tsinghua University, Adobe Research<br>
 ## DiffAugment for StyleGAN2
 
 To run *StyleGAN2 + DiffAugment* for unconditional generation on CIFAR and few-shot generation, please refer to the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) README.
+
+## DiffAugment for BigGAN
+
+To run *BigGAN + DiffAugment* for conditional generation on CIFAR, please refer to the [DiffAugment-biggan-cifar](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-cifar) README.
 
 ## Using DiffAugment for Your Own Training
 

@@ -1,0 +1,13 @@
+*.zip
+*.pyc
+/logs/
+/weights/
+/samples/
+/models/
+/data/
+__pycache__/
+/.cache/
+*.jpg
+*.pkl
+*.h5
+.nfs*
