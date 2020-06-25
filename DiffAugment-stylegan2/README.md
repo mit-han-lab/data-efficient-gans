@@ -68,7 +68,7 @@ To run the CIFAR experiments with 100% data:
 python run_cifar.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,cutout
 ```
 
-`WHICH_DATASET` specifies either `cifar10` or `cifar100` (default to `cifar10`). `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. Set `--DiffAugment=""` to run the baseline model.
+`WHICH_DATASET` specifies either `cifar10` or `cifar100` (default to `cifar10`). `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. The training typically requires around 2 days. Set `--DiffAugment=""` to run the baseline model.
 
 To run the CIFAR experiments with partial data:
 
@@ -92,7 +92,7 @@ or the following command to run on the AnimalFace datasets (with a smaller `gamm
 python run_few_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout --gamma=1 --total-kimg=600
 ```
 
-`WHICH_DATASET` specifies `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `AnimalFace-cat`, or `AnimalFace-dog` which will be automatically downloaded, or the path of a folder containing your own training images. `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. Specify `--resolution=RESOLUTION` to run at a different resolution from the default `256`.
+`WHICH_DATASET` specifies `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `AnimalFace-cat`, or `AnimalFace-dog` which will be automatically downloaded, or the path of a folder containing your own training images. `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. The training typically requires several hours. Specify `--resolution=RESOLUTION` to run at a different resolution from the default `256`.
 
 ### Preparing Your Own Datasets
 

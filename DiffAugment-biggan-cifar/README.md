@@ -55,6 +55,8 @@ We provide a complete set of training scripts in the `scripts` folder to facilit
 CUDA_VISIBLE_DEVICES=0,1 bash scripts/DiffAugment-biggan-cifar10-0.1.sh
 ```
 
+The training typically requires around 1 day on 2 GPUs.
+
 ## Acknowledgements
 
 The official TensorFlow implementation of the Inception v3 model for IS and FID calculation is borrowed from the [StyleGAN2 repo](https://github.com/NVlabs/stylegan2).
