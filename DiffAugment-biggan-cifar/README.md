@@ -55,7 +55,7 @@ We provide a complete set of training scripts in the `scripts` folder to facilit
 CUDA_VISIBLE_DEVICES=0,1 bash scripts/DiffAugment-biggan-cifar10-0.1.sh
 ```
 
-The training typically requires around 1 day on 2 GPUs.
+The training typically takes around 1 day on 2 GPUs.
 
 ## Acknowledgements
 

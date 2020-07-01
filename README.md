@@ -24,8 +24,18 @@ MIT, Tsinghua University, Adobe Research<br>
 ## Overview
 <img src="imgs/method.jpg" width="1000px"/>
 
-
 *Overview of DiffAugment for updating D (left) and G (right). DiffAugment applies the augmentation T to both the real sample x and the generated output G(z). When we update G, gradients need to be back-propagated through T, which requires T to be differentiable w.r.t. the input.*
+
+## Training with 100 Images
+
+The following script will train on the 100-shot Obama dataset using 4 GPUs:
+
+```bash
+cd DiffAugment-stylegan2
+python run_few_shot.py --dataset=100-shot-obama --num-gpus=4
+```
+
+You may also try out `100-shot-grumpy_cat`, `100-shot-panda`, or the folder containing your own training images. Please refer to the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) README for the dependencies and details.
 
 ## DiffAugment for StyleGAN2
 
@@ -39,11 +49,11 @@ To run *BigGAN + DiffAugment* for conditional generation on CIFAR, please refer 
 
 To help you use DiffAugment in your own codebase, we provide portable DiffAugment operations of both TensorFlow and PyTorch versions in [DiffAugment_tf.py](https://github.com/mit-han-lab/data-efficient-gans/blob/master/DiffAugment_tf.py) and [DiffAugment_pytorch.py](https://github.com/mit-han-lab/data-efficient-gans/blob/master/DiffAugment_pytorch.py). Generally, DiffAugment can be easily adopted in any model by substituting every *D(x)* with *D(T(x))*, where *x* can be real images or fake images, *D* is the discriminator, and *T* is the DiffAugment operation. For example,
 
-```
+```python
 from DiffAugment_pytorch import DiffAugment
 # from DiffAugment_tf import DiffAugment
 policy = 'color,translation,cutout' # If your dataset is as small as ours (e.g.,
-# 100 images), we recommend using the strongest DiffAugment:  Color + Translation + Cutout.
+# 100 images), we recommend using the strongest Color + Translation + Cutout.
 # For large datasets, try using a subset of transformations in ['color', 'translation', 'cutout'].
 # Welcome to discover more DiffAugment transformations!
 
@@ -51,13 +61,18 @@ policy = 'color,translation,cutout' # If your dataset is as small as ours (e.g.,
 # Training loop
 reals = sample_real_images() # a batch of real images
 fakes = generate_fake_images() # a batch of fake images
-real_scores = Discriminator(DiffAugment(reals, policy=policy))
-fake_scores = Discriminator(DiffAugment(fakes, policy=policy))
+reals = DiffAugment(reals, policy=policy) # augmented real images
+fakes = DiffAugment(fakes, policy=policy) # augmented fake images
+real_scores = Discriminator(reals)
+fake_scores = Discriminator(fakes)
 # Calculating loss based on real_scores and fake_scores...
 ...
 ```
 
+In some codebases, *G* and *D*'s training iterations are implemented in a separate manner. Please make sure that the same DiffAugment policy is applied when training *G* as well as *D*.
+
 ## Citation
+
 If you use this code in your research, please cite our paper:
 ```
 @article{zhao2020diffaugment,
