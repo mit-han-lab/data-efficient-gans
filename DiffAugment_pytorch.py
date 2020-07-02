@@ -1,6 +1,6 @@
 # Differentiable Augmentation for Data-Efficient GAN Training
 # Shengyu Zhao, Zhijian Liu, Ji Lin, Jun-Yan Zhu, and Song Han
-# https://arxiv.org/pdf/2006.10738.pdf
+# https://arxiv.org/pdf/2006.10738
 
 import torch
 import torch.nn.functional as F
@@ -36,8 +36,8 @@ def rand_contrast(x):
     return x
 
 
-def rand_translation(x, ratio=(1, 8)):
-    shift_x, shift_y = x.size(2) * ratio[0] // ratio[1], x.size(3) * ratio[0] // ratio[1]
+def rand_translation(x, ratio=0.125):
+    shift_x, shift_y = int(x.size(2) * ratio + 0.5), int(x.size(3) * ratio + 0.5)
     translation_x = torch.randint(-shift_x, shift_x + 1, size=[x.size(0), 1, 1], device=x.device)
     translation_y = torch.randint(-shift_y, shift_y + 1, size=[x.size(0), 1, 1], device=x.device)
     grid_batch, grid_x, grid_y = torch.meshgrid(
@@ -52,8 +52,8 @@ def rand_translation(x, ratio=(1, 8)):
     return x
 
 
-def rand_cutout(x, ratio=(1, 2)):
-    cutout_size = x.size(2) * ratio[0] // ratio[1], x.size(3) * ratio[0] // ratio[1]
+def rand_cutout(x, ratio=0.5):
+    cutout_size = int(x.size(2) * ratio + 0.5), int(x.size(3) * ratio + 0.5)
     offset_x = torch.randint(0, x.size(2) + (1 - cutout_size[0] % 2), size=[x.size(0), 1, 1], device=x.device)
     offset_y = torch.randint(0, x.size(3) + (1 - cutout_size[1] % 2), size=[x.size(0), 1, 1], device=x.device)
     grid_batch, grid_x, grid_y = torch.meshgrid(
