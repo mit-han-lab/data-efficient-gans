@@ -121,33 +121,34 @@ def create_from_images(dataset, resolution, tfrecord_dir=None, shuffle=True):
 
     print('Loading images from "%s"' % image_dir)
     image_filenames = sorted(glob.glob(os.path.join(image_dir, '*')))
-    image_filenames = [fname for fname in image_filenames if fname.split('.')[-1] not in ['pkl', 'tfrecords']]
+    image_filenames = [fname for fname in image_filenames if fname.split('.')[-1].lower() in ['jpg', 'jpeg', 'png', 'bmp']]
     if len(image_filenames) == 0:
         error('No input images found')
 
-    img = np.asarray(PIL.Image.open(image_filenames[0]))
-    if resolution is None:
-        resolution = img.shape[0]
-        if img.shape[1] != resolution:
-            error('Input images must have the same width and height')
-    if resolution != 2 ** int(np.floor(np.log2(resolution))):
-        error('Input image resolution must be a power-of-two')
-    channels = img.shape[2] if img.ndim == 3 else 1
-    if channels not in [1, 3]:
-        error('Input images must be stored as RGB or grayscale')
+    if not glob.glob(os.path.join(image_dir, '*.tfrecords')):
+        img = np.asarray(PIL.Image.open(image_filenames[0]))
+        if resolution is None:
+            resolution = img.shape[0]
+            if img.shape[1] != resolution:
+                error('Input images must have the same width and height')
+        if resolution != 2 ** int(np.floor(np.log2(resolution))):
+            error('Input image resolution must be a power-of-two')
+        channels = img.shape[2] if img.ndim == 3 else 1
+        if channels not in [1, 3]:
+            error('Input images must be stored as RGB or grayscale')
 
-    with TFRecordExporter(tfrecord_dir, len(image_filenames)) as tfr:
-        order = tfr.choose_shuffled_order() if shuffle else np.arange(len(image_filenames))
-        for idx in range(order.size):
-            img = PIL.Image.open(image_filenames[order[idx]])
-            if resolution is not None:
-                img = img.resize((resolution, resolution), PIL.Image.ANTIALIAS)
-            img = np.asarray(img)
-            if channels == 1 or len(img.shape) == 2:
-                img = np.stack([img] * channels)  # HW => CHW
-            else:
-                img = img.transpose([2, 0, 1])  # HWC => CHW
-            tfr.add_image(img)
+        with TFRecordExporter(tfrecord_dir, len(image_filenames)) as tfr:
+            order = tfr.choose_shuffled_order() if shuffle else np.arange(len(image_filenames))
+            for idx in range(order.size):
+                img = PIL.Image.open(image_filenames[order[idx]])
+                if resolution is not None:
+                    img = img.resize((resolution, resolution), PIL.Image.ANTIALIAS)
+                img = np.asarray(img)
+                if channels == 1 or len(img.shape) == 2:
+                    img = np.stack([img] * channels)  # HW => CHW
+                else:
+                    img = img.transpose([2, 0, 1])  # HWC => CHW
+                tfr.add_image(img)
     return tfrecord_dir, len(image_filenames)
 
 # ----------------------------------------------------------------------------
