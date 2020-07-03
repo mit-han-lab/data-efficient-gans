@@ -96,4 +96,7 @@ python run_few_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment
 
 ### Preparing Your Own Datasets
 
-Our method can generate good results using a small number of samples, e.g., 100 images. You may create a new dataset at such scale easily, but note that the generated results may be sensitive to the quality of the training samples. You may wish to crop the raw images and discard some bad training samples. After putting all images into a single folder, pass it to `WHICH_DATASET`, the images will be resized to the specified resolution if necessary, and then enjoy the outputs! You may increase the training length (default to 300k images) for larger datasets; note that there may be overfitting issues if the training is too long.
+Our method can generate good results using a small number of samples, e.g., 100 images. You may create a new dataset at such scale easily, but note that the generated results may be sensitive to the quality of the training samples. You may wish to crop the raw images and discard some bad training samples. After putting all images into a single folder, pass it to `WHICH_DATASET`, the images will be resized to the specified resolution if necessary, and then enjoy the outputs! Note that,
+
+- The training length (default to 300k images) may be increased for larger datasets; note that there may be overfitting issues if the training is too long.
+- The cached files will be stored in the same folder with the training images. If the training images in your folder is *changed* after some run, please manually clean the cached files, `*.tfrecords` and `*.pkl`, from your image folder before rerun.
