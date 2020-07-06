@@ -9,8 +9,6 @@ This repo is implemented upon and has the same dependencies as the official [Sty
 
 ## Pre-Trained Models and Evaluation
 
-### CIFAR-10 and CIFAR-100
-
 To evaluate a model on CIFAR-10 or CIFAR-100, run the following command:
 
 ```bash
@@ -35,8 +33,6 @@ Here, `WHICH_DATASET` specifies either `cifar10` or `cifar100` (default to `cifa
 | `mit-han-lab:DiffAugment-stylegan2-cifar100-0.1.pkl` | `cifar100` (10% data) | **9.06** | **20.75** |
 
 The evaluation results of the pre-trained models should be close to these numbers. Specify `--num-repeats=REPEATS` to compute means and standard deviations over multiple evaluation runs. A standard deviation of less than 1% relatively is expected.
-
-### Few-Shot Generation
 
 To evaluate a model on a few-shot dataset, run the following command:
 
