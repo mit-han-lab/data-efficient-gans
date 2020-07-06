@@ -25,7 +25,7 @@ def open_file_or_url(file_or_url):
 
 
 def load_pkl(file_or_url):
-    with open_file_or_url(file_or_url) as file:
+    with open_file_or_url(get_path_or_url(file_or_url)) as file:
         return pickle.load(file, encoding='latin1')
 
 
