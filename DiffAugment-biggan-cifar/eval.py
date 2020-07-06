@@ -27,8 +27,7 @@ def run_eval(config):
                                 z_var=config['z_var'])
     get_inception_metrics = inception_tf.prepare_inception_metrics(config['dataset'], config['parallel'], config)
 
-    network_url = config['network'].replace('mit-han-lab:', 'https://hanlab.mit.edu/projects/data-efficient-gans/models/')
-    G.load_state_dict(torch.load(dnnlib.util.open_file_or_url(network_url)))
+    G.load_state_dict(torch.load(dnnlib.util.open_file_or_url(config['network'])))
     if config['G_eval_mode']:
         G.eval()
     else:

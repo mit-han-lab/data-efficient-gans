@@ -19,13 +19,14 @@ import dnnlib
 
 
 def open_file_or_url(file_or_url):
+    file_or_url = get_path_or_url(file_or_url)
     if dnnlib.util.is_url(file_or_url):
         return dnnlib.util.open_url(file_or_url, cache_dir='.stylegan2-cache')
     return open(file_or_url, 'rb')
 
 
 def load_pkl(file_or_url):
-    with open_file_or_url(get_path_or_url(file_or_url)) as file:
+    with open_file_or_url(file_or_url) as file:
         return pickle.load(file, encoding='latin1')
 
 

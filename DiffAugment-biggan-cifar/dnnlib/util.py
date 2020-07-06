@@ -416,6 +416,7 @@ def open_url(url: str, cache_dir: str = None, num_attempts: int = 10, verbose: b
 
 
 def open_file_or_url(file_or_url):
+    file_or_url = get_path_or_url(file_or_url)
     if is_url(file_or_url):
         return open_url(file_or_url, cache_dir='.cache')
     return open(file_or_url, 'rb')
@@ -429,3 +430,7 @@ def load_pkl(file_or_url):
 def save_pkl(obj, filename):
     with open(filename, 'wb') as file:
         pickle.dump(obj, file, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def get_path_or_url(path_or_url):
+    return path_or_url.replace('mit-han-lab:', 'https://hanlab.mit.edu/projects/data-efficient-gans/models/')
