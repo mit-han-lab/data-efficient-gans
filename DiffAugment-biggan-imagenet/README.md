@@ -26,12 +26,12 @@ The evaluation typically takes around half an hour. `WHICH_MODEL` specifies the 
 
 | Model name                                           | Dataset           | IS     | FID    |
 | ---------------------------------------------------- | ----------------- | --------- | --------- |
-| `mit-han-lab:biggan-imagenet128`                     | `imagenet_128`             | 9.06      | 9.59      |
-| `mit-han-lab:DiffAugment-biggan-imagenet128`         | `imagenet_128`             | **9.16**  | **8.70**  |
-| `mit-han-lab:biggan-imagenet128-0.5`                 | `imagenet_128` (50% data)  | 8.41      | 21.58     |
-| `mit-han-lab:DiffAugment-biggan-imagenet128-0.5`     | `imagenet_128` (50% data)  | **8.65**  | **14.04** |
-| `mit-han-lab:biggan-imagenet128-0.25`                 | `imagenet_128` (25% data)  | 7.62      | 39.78     |
-| `mit-han-lab:DiffAugment-biggan-imagenet128-0.25`     | `imagenet_128` (25% data)  | **8.09**  | **22.40** |
+| `mit-han-lab:biggan-imagenet128`                     | `imagenet_128`             | 94.5      | 7.62      |
+| `mit-han-lab:DiffAugment-biggan-imagenet128`         | `imagenet_128`             | **100.8**  | **6.80**  |
+| `mit-han-lab:biggan-imagenet128-0.5`                 | `imagenet_128` (50% data)  | 89.9      | 9.64     |
+| `mit-han-lab:DiffAugment-biggan-imagenet128-0.5`     | `imagenet_128` (50% data)  | **91.9**  | **8.88** |
+| `mit-han-lab:biggan-imagenet128-0.25`                 | `imagenet_128` (25% data)  | 46.5      | 25.37     |
+| `mit-han-lab:DiffAugment-biggan-imagenet128-0.25`     | `imagenet_128` (25% data)  | **74.2**  | **13.28** |
 
 The evaluation results of the pre-trained models should be close to these numbers. Specify `--num_eval_averaging_runs` to compute means and standard deviations over multiple evaluation runs. A standard deviation of less than 1% relatively is expected.
 
