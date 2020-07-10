@@ -2,6 +2,12 @@
 
 #### [arXiv preprint](https://arxiv.org/pdf/2006.10738)
 
+<img src="imgs/interp.gif">
+
+*Generated using only 100 images of Obama, grumpy cat, panda, Bridge of Sighs, and Wuzhen, without pre-training.*
+
+**[NEW!]** Time to generate 100-shot interpolation videos with [generate_gif.py](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2/generate_gif.py)!
+
 **[NEW!]** Our [DiffAugment-biggan-imagenet](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-imagenet) repo (for TPU training) is released!
 
 **[NEW!]** Our [DiffAugment-biggan-cifar](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-cifar) PyTorch repo is released!
@@ -9,7 +15,6 @@
 This repository contains our implementation of Differentiable Augmentation (DiffAugment) in both PyTorch and TensorFlow. It can be used to significantly improve the data efficiency for GAN training. We have provided the TensorFlow code of [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2), the PyTorch code of [DiffAugment-biggan-cifar](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-cifar) for GPU training, and the TensorFlow code of [DiffAugment-biggan-imagenet](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-imagenet) for TPU training.
 
 <img src="imgs/few_shot-comparison.jpg" width="1000px"/>
-
 
 *Few-shot generation without pre-training. With DiffAugment, our model can generate high-fidelity images using only 100 Obama portraits, grumpy cats, or pandas from our collected 100-shot datasets, 160 cats or 389 dogs from the AnimalFace dataset at 256×256 resolution.*
 
@@ -26,18 +31,24 @@ MIT, Tsinghua University, Adobe Research<br>
 ## Overview
 <img src="imgs/method.jpg" width="1000px"/>
 
-*Overview of DiffAugment for updating D (left) and G (right). DiffAugment applies the augmentation T to both the real sample x and the generated output G(z). When we update G, gradients need to be back-propagated through T, which requires T to be differentiable w.r.t. the input.*
+*Overview of DiffAugment for updating D (left) and G (right). DiffAugment applies the augmentation T to both the real sample x and the generated output G(z). When we update G, gradients need to be back-propagated through T (iii), which requires T to be differentiable w.r.t. the input.*
 
-## Training with 100 Images
+## Training and Generation with 100 Images
 
-The following script will train on the 100-shot Obama dataset using 4 GPUs:
+To generate an interpolation video using our pre-trained models:
 
 ```bash
 cd DiffAugment-stylegan2
+python generate_gif.py -r mit-han-lab:DiffAugment-stylegan2-100-shot-obama.pkl -o obama.gif
+```
+
+or to train a new model:
+
+```bash
 python run_few_shot.py --dataset=100-shot-obama --num-gpus=4
 ```
 
-You may also try out `100-shot-grumpy_cat`, `100-shot-panda`, or the folder containing your own training images. Please refer to the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) README for the dependencies and details.
+You may also try out `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_of_sighs`, `100-shot-wuzhen`, or the folder containing your own training images. Please refer to the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) README for the dependencies and details.
 
 ## DiffAugment for StyleGAN2
 

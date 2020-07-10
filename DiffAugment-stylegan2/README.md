@@ -7,6 +7,16 @@ This repo is implemented upon and has the same dependencies as the official [Sty
 - We recommend using 4 or 8 GPUs with at least 12 GB of DRAM for training.
 - If you are facing problems with `nvcc` (when building custom ops of StyleGAN2), this can be circumvented by specifying `--impl=ref` in training at the cost of a slightly longer training time.
 
+## Generating an Interpolation Video
+
+Run the following command to generate an interpolation video:
+
+```bash
+python generate_gif.py --resume=WHICH_MODEL --output=OUTPUT_FILENAME
+```
+
+`WHICH_MODEL` specifies the path of a checkpoint or any pre-trained models in the tables below.
+
 ## Pre-Trained Models and Evaluation
 
 To evaluate a model on CIFAR-10 or CIFAR-100, run the following command:
