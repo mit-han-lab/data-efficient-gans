@@ -50,7 +50,7 @@ To evaluate a model on a few-shot dataset, run the following command:
 python run_few_shot.py --dataset=WHICH_DATASET --resume=WHICH_MODEL --eval
 ```
 
-Here, `WHICH_DATASET` specifies the folder containing the training images, or one of our pre-defined datasets, including `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `AnimalFace-cat`, and `AnimalFace-dog`, which will be automatically downloaded. `WHICH_MODEL` specifies the path of a checkpoint, or a pre-trained model in the following list, which will be automatically downloaded:
+Here, `WHICH_DATASET` specifies the folder containing the training images, or one of our pre-defined datasets, including `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_of_sighs`, `100-shot-wuzhen`, `AnimalFace-cat`, and `AnimalFace-dog`, which will be automatically downloaded. `WHICH_MODEL` specifies the path of a checkpoint, or a pre-trained model in the following list, which will be automatically downloaded:
 | Model name | Dataset | fid5k-train |
 | --- | --- | --- |
 | `mit-han-lab:stylegan2-100-shot-obama.pkl` | `100-shot-obama` | 89.18 |
@@ -98,7 +98,7 @@ or the following command to run on the AnimalFace datasets (with a smaller `gamm
 python run_few_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout --gamma=1 --total-kimg=600
 ```
 
-`WHICH_DATASET` specifies `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `AnimalFace-cat`, or `AnimalFace-dog` which will be automatically downloaded, or the path of a folder containing your own training images. `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. The training typically takes several hours. Set `--DiffAugment=""` to run the baseline model. Specify `--resolution=RESOLUTION` to run at a different resolution from the default `256`.
+`WHICH_DATASET` specifies `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_of_sighs`, `100-shot-wuzhen`, `AnimalFace-cat`, or `AnimalFace-dog`, which will be automatically downloaded, or the path of a folder containing your own training images. `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. The training typically takes several hours. Set `--DiffAugment=""` to run the baseline model. Specify `--resolution=RESOLUTION` to run at a different resolution from the default `256`.
 
 ### Preparing Your Own Datasets
 
