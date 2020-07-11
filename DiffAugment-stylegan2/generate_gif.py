@@ -15,7 +15,6 @@ def run(resume, output, num_rows, num_cols, num_phases, transition_frames, stati
     tflib.init_tf({'rnd.np_random_seed': seed})
     _, _, Gs = misc.load_pkl(resume)
     output_seq = []
-    total_frames = num_phases * (transition_frames + static_frames)
     batch_size = num_rows * num_cols
     latent_size = Gs.input_shape[1]
     latents = [np.random.randn(batch_size, latent_size) for _ in range(num_phases)]
@@ -36,8 +35,7 @@ def run(resume, output, num_rows, num_cols, num_phases, transition_frames, stati
         for j in range(transition_frames):
             dlatents = (dlatents0 * (transition_frames - j) + dlatents1 * j) / transition_frames
             output_seq.append(to_image_grid(Gs.components.synthesis.run(dlatents, **Gs_kwargs)))
-        for j in range(static_frames):
-            output_seq.append(to_image_grid(Gs.components.synthesis.run(dlatents1, **Gs_kwargs)))
+        output_seq.extend([to_image_grid(Gs.components.synthesis.run(dlatents1, **Gs_kwargs))] * static_frames)
     if not output.endswith('.gif'):
         output += '.gif'
     output_seq[0].save(output, save_all=True, append_images=output_seq[1:], optimize=False, duration=50, loop=0)
