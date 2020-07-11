@@ -100,7 +100,7 @@ python run_few_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment
 
 `WHICH_DATASET` specifies `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_of_sighs`, `100-shot-wuzhen`, `AnimalFace-cat`, or `AnimalFace-dog`, which will be automatically downloaded, or the path of a folder containing your own training images. `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. The training typically takes several hours. Set `--DiffAugment=""` to run the baseline model. Specify `--resolution=RESOLUTION` to run at a different resolution from the default `256`.
 
-#### Preparing Your Own Datasets
+### Preparing Your Own Datasets
 
 Our method can generate good results using a small number of samples, e.g., 100 images. You may create a new dataset at such scale easily, but note that the generated results may be sensitive to the quality of the training samples. You may wish to crop the raw images and discard some bad training samples. After putting all images into a single folder, pass it to `WHICH_DATASET` in `run_few_shot.py`, the images will be resized to the specified resolution if necessary, and then enjoy the outputs! Note that,
 
