@@ -8,8 +8,6 @@ from dnnlib import tflib
 
 from training import misc
 
-# ----------------------------------------------------------------------------
-
 
 def run(resume, output, num_rows, num_cols, num_phases, transition_frames, static_frames, seed):
     tflib.init_tf({'rnd.np_random_seed': seed})
