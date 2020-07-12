@@ -31,6 +31,7 @@ class MetricBase:
         self._progress_max = None
         self._progress_sec = None
         self._progress_time = None
+        self._num_samples_default = None
         self._reset()
 
     def close(self):
@@ -50,6 +51,9 @@ class MetricBase:
             run_config = misc.parse_config_for_previous_run(run_dir)
             self._dataset_args = dict(run_config['dataset'])
             self._dataset_args['shuffle_mb'] = 0
+            if 'num_samples' in self._dataset_args:
+                self._num_samples_default = self._dataset_args['num_samples']
+            self._dataset_args['num_samples'] = None
 
     def configure_progress_reports(self, plo, phi, pmax, psec=15):
         self._progress_lo = plo

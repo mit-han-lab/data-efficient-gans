@@ -28,7 +28,7 @@ class FID(metric_base.MetricBase):
 
     def _evaluate(self, Gs, Gs_kwargs, num_gpus):
         if self.num_real_images is None:
-            self.num_real_images = self._get_dataset_obj().num_samples
+            self.num_real_images = self._num_samples_default or self._get_dataset_obj().num_samples
         if self.num_images is None:
             self.num_images = self.num_real_images
         num_channels = Gs.output_shape[1]
