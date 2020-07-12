@@ -13,7 +13,6 @@ import dnnlib
 from dnnlib import tflib
 from dnnlib import EasyDict
 
-import pretrained_networks
 from metrics import metric_base
 from metrics.metric_defaults import metric_defaults
 from training import dataset_tool
