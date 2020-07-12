@@ -64,7 +64,7 @@ The evaluation results of the pre-trained models should be close to these number
 
 ## FFHQ
 
-The NVIDIA's FFHQ dataset can be downloaded [here](https://drive.google.com/open?id=1LTBpJ0W_WLjqza3zdayligS8Dh1V1gA6). If you want to run at 256x256 resolution for example, only `ffhq-r08.tfrecords` needs to be downloaded. Pass the folder containing the `.tfrecords` file to `PATH_TO_THE_TFRECORDS_FOLDER` below:
+The NVIDIA's FFHQ dataset can be downloaded [here](https://drive.google.com/drive/folders/1M24jfI-Ylb-k2EGhELSnxssWi9wGUokg). If you want to run at 256x256 resolution for example, only `ffhq-r08.tfrecords` needs to be downloaded. Pass the folder containing the `.tfrecords` file to `PATH_TO_THE_TFRECORDS_FOLDER` below:
 
 ```bash
 python run_ffhq.py --dataset=PATH_TO_THE_TFRECORDS_FOLDER --num-samples=NUM_SAMPLES --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout
