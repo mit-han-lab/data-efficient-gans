@@ -6,6 +6,8 @@
 
 *Generated using only 100 images of Obama, grumpy cat, panda, Bridge of Sighs, and Wuzhen, without pre-training.*
 
+**[NEW!]** FFHQ training is supported! See the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) README.
+
 **[NEW!]** Time to generate 100-shot interpolation videos with [generate_gif.py](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2/generate_gif.py)!
 
 **[NEW!]** Our [DiffAugment-biggan-imagenet](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-imagenet) repo (for TPU training) is released!
@@ -52,7 +54,7 @@ You may also try out `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_o
 
 ## DiffAugment for StyleGAN2
 
-To run *StyleGAN2 + DiffAugment* for unconditional generation on CIFAR and few-shot generation, please refer to the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) README.
+To run *StyleGAN2 + DiffAugment* for unconditional generation on few-shot generation, CIFAR, and FFHQ, please refer to the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) README.
 
 ## DiffAugment for BigGAN
 
@@ -74,10 +76,8 @@ policy = 'color,translation,cutout' # If your dataset is as small as ours (e.g.,
 # Training loop
 reals = sample_real_images() # a batch of real images
 fakes = generate_fake_images() # a batch of fake images
-reals = DiffAugment(reals, policy=policy) # augmented real images
-fakes = DiffAugment(fakes, policy=policy) # augmented fake images
-real_scores = Discriminator(reals)
-fake_scores = Discriminator(fakes)
+real_scores = Discriminator(DiffAugment(reals, policy=policy))
+fake_scores = Discriminator(DiffAugment(fakes, policy=policy))
 # Calculating loss based on real_scores and fake_scores...
 ...
 ```
