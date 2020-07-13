@@ -31,7 +31,6 @@ class MetricBase:
         self._progress_max = None
         self._progress_sec = None
         self._progress_time = None
-        self._num_samples_default = None
         self._reset()
 
     def close(self):
@@ -51,8 +50,6 @@ class MetricBase:
             run_config = misc.parse_config_for_previous_run(run_dir)
             self._dataset_args = dict(run_config['dataset'])
             self._dataset_args['shuffle_mb'] = 0
-            if 'num_samples' in self._dataset_args:
-                self._num_samples_default = self._dataset_args['num_samples']
             self._dataset_args['num_samples'] = None
 
     def configure_progress_reports(self, plo, phi, pmax, psec=15):
@@ -118,31 +115,41 @@ class MetricBase:
 
     def _get_cache_file_for_reals(self, prefix, num_images, extension='pkl', mirror_augment=False):
         dataset_name = self._get_dataset_obj().name
-        return os.path.join(self._cache_dir, '{}-{}-{}-{}{}.{}'.format(prefix, dataset_name, self.split, num_images, '-flip' if mirror_augment else '', extension))
+        return os.path.join(self._cache_dir, '{}-{}-{}{}{}.{}'.format(
+            prefix,
+            dataset_name,
+            self.split,
+            '-{}'.format(num_images) if num_images else '',
+            '-flip' if mirror_augment else '',
+            extension,
+        ))
 
     def _get_dataset_obj(self):
         if self._dataset_obj is None:
-            self._dataset_obj = dataset.load_dataset(data_dir=self._data_dir, split=self.split, **self._dataset_args)
+            self._dataset_obj = dataset.load_dataset(data_dir=self._data_dir, split=self.split, repeat=False, **self._dataset_args)
         return self._dataset_obj
 
-    def _iterate_reals(self, minibatch_size, return_label=False, iterate_once=False, num_samples=None, mirror_augment=False):
+    def _iterate_reals(self, minibatch_size, return_label=False, num_samples=None, mirror_augment=False):
         dataset_obj = self._get_dataset_obj()
-        if iterate_once:
-            assert dataset_obj.num_samples
-            num_samples = dataset_obj.num_samples
         begin = 0
         while True:
             end = begin + minibatch_size
             if num_samples:
                 end = min(end, num_samples)
-            images, labels = dataset_obj.get_minibatch_np(end - begin)
+            try:
+                images, labels = dataset_obj.get_minibatch_np(end - begin)
+            except tf.errors.OutOfRangeError:
+                if num_samples is None:
+                    break
+                else:
+                    raise
             if mirror_augment:
                 images = misc.apply_mirror_augment(images)
             if return_label:
                 yield (images, labels)
             else:
                 yield images
-            if end == num_samples:
+            if num_samples and end == num_samples:
                 break
             begin = end
 

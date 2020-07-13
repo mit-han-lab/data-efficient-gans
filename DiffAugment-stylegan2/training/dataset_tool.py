@@ -26,9 +26,11 @@ def error(msg):
 
 
 class TFRecordExporter:
-    def __init__(self, tfrecord_dir, expected_images, print_progress=True, progress_interval=10):
+    def __init__(self, tfrecord_dir, expected_images, resolution=None, print_progress=True, progress_interval=10):
         self.tfrecord_dir = tfrecord_dir
         self.tfr_prefix = os.path.join(self.tfrecord_dir, os.path.basename(self.tfrecord_dir))
+        if resolution:
+            self.tfr_prefix += '-{}'.format(resolution)
         self.expected_images = expected_images
         self.cur_images = 0
         self.shape = None
@@ -100,65 +102,114 @@ class TFRecordExporter:
 
 # ----------------------------------------------------------------------------
 
+def unzip_from_url(data_dir, dataset_url):
+    zip_path = dnnlib.util.open_url(dataset_url, cache_dir='.stylegan2-cache', return_path=True)
+    with zipfile.ZipFile(zip_path, 'r') as f:
+        f.extractall(data_dir)
 
-def create_from_images(dataset, resolution, tfrecord_dir=None, shuffle=True):
-    if dataset in [
-        '100-shot-obama',
-        '100-shot-grumpy_cat',
-        '100-shot-panda',
-        '100-shot-bridge_of_sighs',
-        '100-shot-medici_fountain',
-        '100-shot-temple_of_heaven',
-        '100-shot-wuzhen',
-        'AnimalFace-cat',
-        'AnimalFace-dog',
-    ]:
-        image_dir = 'datasets/{}'.format(dataset)
-        if not glob.glob(os.path.join(image_dir, '*.tfrecords')):
-            try:
-                os.makedirs(image_dir)
-            except:
-                pass
-            dataset_url = 'https://hanlab.mit.edu/projects/data-efficient-gans/datasets/{}.zip'.format(dataset)
-            zip_path = dnnlib.util.open_url(dataset_url, cache_dir='.stylegan2-cache', return_path=True)
-            with zipfile.ZipFile(zip_path, 'r') as f:
-                f.extractall(image_dir)
-    else:
-        image_dir = dataset
-    assert os.path.isdir(image_dir)
+
+def create_from_lmdb(data_dir, resolution=None, tfrecord_dir=None, max_images=None):
     if tfrecord_dir is None:
-        tfrecord_dir = image_dir
+        tfrecord_dir = data_dir
+    print('Loading LMDB dataset from "%s"' % data_dir)
+    import lmdb # pip install lmdb # pylint: disable=import-error
+    import cv2 # pip install opencv-python
+    import io
+    with lmdb.open(data_dir, readonly=True).begin(write=False) as txn:
+        total_images = txn.stat()['entries'] # pylint: disable=no-value-for-parameter
+        if max_images is None:
+            max_images = total_images
+        with TFRecordExporter(tfrecord_dir, max_images, resolution) as tfr:
+            for _idx, (_key, value) in enumerate(txn.cursor()):
+                try:
+                    try:
+                        img = cv2.imdecode(np.fromstring(value, dtype=np.uint8), 1)
+                        if img is None:
+                            raise IOError('cv2.imdecode failed')
+                        img = img[:, :, ::-1] # BGR => RGB
+                    except IOError:
+                        img = np.asarray(PIL.Image.open(io.BytesIO(value)))
+                    crop = np.min(img.shape[:2])
+                    img = img[(img.shape[0] - crop) // 2 : (img.shape[0] + crop) // 2, (img.shape[1] - crop) // 2 : (img.shape[1] + crop) // 2]
+                    img = PIL.Image.fromarray(img, 'RGB')
+                    img = img.resize((resolution, resolution), PIL.Image.ANTIALIAS)
+                    img = np.asarray(img)
+                    img = img.transpose([2, 0, 1]) # HWC => CHW
+                    tfr.add_image(img)
+                except:
+                    print(sys.exc_info()[1])
+                if tfr.cur_images == max_images:
+                    break
+    return tfrecord_dir
 
-    print('Loading images from "%s"' % image_dir)
-    image_filenames = sorted(glob.glob(os.path.join(image_dir, '*')))
+
+def create_from_images(data_dir, resolution=None, tfrecord_dir=None, shuffle=True):
+    if tfrecord_dir is None:
+        tfrecord_dir = data_dir
+    print('Loading images from "%s"' % data_dir)
+    image_filenames = sorted(glob.glob(os.path.join(data_dir, '*')))
     image_filenames = [fname for fname in image_filenames if fname.split('.')[-1].lower() in ['jpg', 'jpeg', 'png', 'bmp']]
     if len(image_filenames) == 0:
         error('No input images found')
 
-    if not glob.glob(os.path.join(image_dir, '*.tfrecords')):
-        img = np.asarray(PIL.Image.open(image_filenames[0]))
-        if resolution is None:
-            resolution = img.shape[0]
-            if img.shape[1] != resolution:
-                error('Input images must have the same width and height')
-        if resolution != 2 ** int(np.floor(np.log2(resolution))):
-            error('Input image resolution must be a power-of-two')
-        channels = img.shape[2] if img.ndim == 3 else 1
-        if channels not in [1, 3]:
-            error('Input images must be stored as RGB or grayscale')
+    img = np.asarray(PIL.Image.open(image_filenames[0]))
+    if resolution is None:
+        resolution = img.shape[0]
+        if img.shape[1] != resolution:
+            error('Input images must have the same width and height')
+    if resolution != 2 ** int(np.floor(np.log2(resolution))):
+        error('Input image resolution must be a power-of-two')
+    channels = img.shape[2] if img.ndim == 3 else 1
+    if channels not in [1, 3]:
+        error('Input images must be stored as RGB or grayscale')
 
-        with TFRecordExporter(tfrecord_dir, len(image_filenames)) as tfr:
-            order = tfr.choose_shuffled_order() if shuffle else np.arange(len(image_filenames))
-            for idx in range(order.size):
-                img = PIL.Image.open(image_filenames[order[idx]])
-                if resolution is not None:
-                    img = img.resize((resolution, resolution), PIL.Image.ANTIALIAS)
-                img = np.asarray(img)
-                if channels == 1 or len(img.shape) == 2:
-                    img = np.stack([img] * channels)  # HW => CHW
-                else:
-                    img = img.transpose([2, 0, 1])  # HWC => CHW
-                tfr.add_image(img)
-    return tfrecord_dir, len(image_filenames)
+    with TFRecordExporter(tfrecord_dir, len(image_filenames), resolution) as tfr:
+        order = tfr.choose_shuffled_order() if shuffle else np.arange(len(image_filenames))
+        for idx in range(order.size):
+            img = PIL.Image.open(image_filenames[order[idx]])
+            if resolution is not None:
+                img = img.resize((resolution, resolution), PIL.Image.ANTIALIAS)
+            img = np.asarray(img)
+            if channels == 1 or len(img.shape) == 2:
+                img = np.stack([img] * channels)  # HW => CHW
+            else:
+                img = img.transpose([2, 0, 1])  # HWC => CHW
+            tfr.add_image(img)
+    return tfrecord_dir
+
+
+def create_dataset(dataset, resolution=None):
+    if dataset in predefined_datasets:
+        data_dir = 'datasets/{}'.format(dataset)
+        try:
+            os.makedirs(data_dir)
+        except:
+            pass
+    else:
+        data_dir = dataset
+    assert os.path.isdir(data_dir)
+    
+    if glob.glob(os.path.join(data_dir, '*{}.tfrecords'.format('-{}'.format(resolution) if resolution else ''))):
+        return data_dir
+    
+    if glob.glob(os.path.join(data_dir, '*.mdb')):
+        return create_from_lmdb(data_dir, resolution)
+    
+    if dataset in predefined_datasets:
+        unzip_from_url(data_dir, 'https://hanlab.mit.edu/projects/data-efficient-gans/datasets/{}.zip'.format(dataset))
+    return create_from_images(data_dir, resolution)
+
+
+predefined_datasets = [
+    '100-shot-obama',
+    '100-shot-grumpy_cat',
+    '100-shot-panda',
+    '100-shot-bridge_of_sighs',
+    '100-shot-medici_fountain',
+    '100-shot-temple_of_heaven',
+    '100-shot-wuzhen',
+    'AnimalFace-cat',
+    'AnimalFace-dog',
+]
 
 # ----------------------------------------------------------------------------

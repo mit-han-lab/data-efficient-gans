@@ -33,13 +33,13 @@ def run(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, tota
     sc = dnnlib.SubmitConfig()                                          # Options for dnnlib.submit_run().
     tf_config = {'rnd.np_random_seed': 1000}                                   # Options for tflib.init_tf().
 
+    # preprocess dataset into tfrecords
+    dataset = dataset_tool.create_dataset(dataset, resolution)
+
     train.total_kimg = total_kimg
     train.mirror_augment = mirror_augment
     metrics = [metric_defaults[x] for x in metrics]
     metric_args = EasyDict(cache_dir=dataset, num_repeats=num_repeats)
-
-    # preprocess dataset into tfrecords
-    dataset, total_samples = dataset_tool.create_from_images(dataset, resolution)
 
     desc = 'DiffAugment-stylegan2' if DiffAugment else 'stylegan2'
     dataset_args = EasyDict(tfrecord_dir=dataset, resolution=resolution, from_tfrecords=True)
@@ -50,8 +50,6 @@ def run(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, tota
     if num_samples is not None:
         dataset_args.num_samples = num_samples
         desc += '-{}samples'.format(num_samples)
-    else:
-        dataset_args.num_samples = total_samples
 
     if batch_size is not None:
         desc += '-batch{}'.format(batch_size)
@@ -99,10 +97,10 @@ def run(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, tota
 
 
 def run_eval(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, total_kimg, ema_kimg, num_samples, gamma, fmap_base, fmap_max, latent_size, mirror_augment, impl, metrics, resume, resume_kimg, num_repeats, eval):
-    dataset, total_samples = dataset_tool.create_from_images(dataset, resolution)
+    dataset = dataset_tool.create_dataset(dataset, resolution)
     print('Evaluating metrics "%s" for "%s"...' % (','.join(metrics), resume))
     tflib.init_tf()
-    dataset_args = dnnlib.EasyDict(tfrecord_dir=dataset, num_samples=num_samples or total_samples, resolution=resolution, from_tfrecords=True)
+    dataset_args = dnnlib.EasyDict(tfrecord_dir=dataset, num_samples=num_samples, resolution=resolution, from_tfrecords=True)
     metric_group = metric_base.MetricGroup([metric_defaults[metric] for metric in metrics], num_repeats=num_repeats)
     metric_group.run(resume, dataset_args=dataset_args, num_gpus=num_gpus)
 

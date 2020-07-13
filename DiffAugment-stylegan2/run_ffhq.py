@@ -15,6 +15,7 @@ from dnnlib import EasyDict
 
 from metrics import metric_base
 from metrics.metric_defaults import metric_defaults
+from training import dataset_tool
 from training import misc
 
 # ----------------------------------------------------------------------------
@@ -32,10 +33,13 @@ def run(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, tota
     sc = dnnlib.SubmitConfig()                                          # Options for dnnlib.submit_run().
     tf_config = {'rnd.np_random_seed': 1000}                                   # Options for tflib.init_tf().
 
+    # preprocess dataset into tfrecords if necessary
+    dataset = dataset_tool.create_dataset(dataset, resolution)
+
     train.total_kimg = total_kimg
     train.mirror_augment = mirror_augment
     metrics = [metric_defaults[x] for x in metrics]
-    metric_args = EasyDict(num_repeats=num_repeats)
+    metric_args = EasyDict(cache_dir=dataset, num_repeats=num_repeats)
 
     desc = 'DiffAugment-stylegan2' if DiffAugment else 'stylegan2'
     dataset_args = EasyDict(tfrecord_dir=dataset, resolution=resolution, from_tfrecords=True)
@@ -93,6 +97,7 @@ def run(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, tota
 
 
 def run_eval(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, total_kimg, ema_kimg, num_samples, gamma, fmap_base, fmap_max, latent_size, mirror_augment, impl, metrics, resume, resume_kimg, num_repeats, eval):
+    dataset = dataset_tool.create_dataset(dataset, resolution)
     print('Evaluating metrics "%s" for "%s"...' % (','.join(metrics), resume))
     tflib.init_tf()
     dataset_args = dnnlib.EasyDict(tfrecord_dir=dataset, shuffle_mb=0, from_tfrecords=True)
@@ -141,7 +146,7 @@ def main():
     parser.add_argument('--latent-size', help='Latent size', default=None, type=int)
     parser.add_argument('--mirror-augment', help='Mirror augment (default: %(default)s)', default=True, metavar='BOOL', type=_str_to_bool)
     parser.add_argument('--impl', help='Custom op implementation (default: %(default)s)', default='cuda')
-    parser.add_argument('--metrics', help='Comma-separated list of metrics or "none" (default: %(default)s)', default='fid50k-ffhq', type=_parse_comma_sep)
+    parser.add_argument('--metrics', help='Comma-separated list of metrics or "none" (default: %(default)s)', default='fid50k-train', type=_parse_comma_sep)
     parser.add_argument('--resume', help='Resume checkpoint path', default=None)
     parser.add_argument('--resume-kimg', help='Resume training length', default=0, type=int)
     parser.add_argument('--num-repeats', help='Repeats of evaluation runs (default: %(default)s)', default=1, type=int, metavar='N')

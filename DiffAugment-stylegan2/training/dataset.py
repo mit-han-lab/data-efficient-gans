@@ -45,7 +45,7 @@ class TFRecordDataset:
         self.label_file = label_file
         self.label_size = None      # components
         self.label_dtype = None
-        self.num_samples = num_samples if split == 'train' else None
+        self.num_samples = num_samples
         self._np_labels = None
         self._tf_minibatch_in = None
         self._tf_labels_var = None
@@ -82,9 +82,13 @@ class TFRecordDataset:
                     self.label_file = guess
 
             # Determine shape and resolution.
-            max_shape = max(tfr_shapes, key=np.prod)
-            tfr_file = [tfr_file for tfr_shape, tfr_file in zip(tfr_shapes, tfr_files) if tfr_shape == max_shape][0]
-            tfr_shape = max_shape
+            target_shape = max(tfr_shapes, key=np.prod)
+            if resolution is not None:
+                for tfr_shape, tfr_file in zip(tfr_shapes, tfr_files):
+                    if max(tfr_shape[1], tfr_shape[2]) == resolution:
+                        target_shape = tfr_shape
+            tfr_file = [tfr_file for tfr_shape, tfr_file in zip(tfr_shapes, tfr_files) if tfr_shape == target_shape][0]
+            tfr_shape = target_shape
             assert tfr_shape[1] == tfr_shape[2]
 
             dset = tf.data.TFRecordDataset(tfr_file, compression_type='', buffer_size=buffer_mb << 20)
