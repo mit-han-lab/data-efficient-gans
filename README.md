@@ -4,7 +4,7 @@
 
 <img src="imgs/interp.gif">
 
-*Generated using only 100 images of Obama, grumpy cat, panda, Bridge of Sighs, and Wuzhen, without pre-training.*
+*Generated using only 100 images of Obama, grumpy cat, panda, the Bridge of Sighs, the Medici Fountain, the Temple of Heaven, and Wuzhen, without pre-training.*
 
 **[NEW!]** FFHQ training is supported! See the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2#FFHQ) README.
 
@@ -50,7 +50,7 @@ or to train a new model:
 python run_few_shot.py --dataset=100-shot-obama --num-gpus=4
 ```
 
-You may also try out `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_of_sighs`, `100-shot-wuzhen`, or the folder containing your own training images. Please refer to the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2#few-shot-generation) README for the dependencies and details.
+You may also try out `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_of_sighs`, `100-shot-medici_fountain`, `100-shot-temple_of_heaven`, `100-shot-wuzhen`, or the folder containing your own training images. Please refer to the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2#few-shot-generation) README for the dependencies and details.
 
 ## DiffAugment for StyleGAN2
 
