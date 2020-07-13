@@ -82,7 +82,7 @@ python run_ffhq.py --dataset=PATH_TO_THE_TFRECORDS_FOLDER --resume=WHICH_MODEL -
 
 Here, `PATH_TO_THE_TFRECORDS_FOLDER` specifies the folder containing the `tfrecords` file. `WHICH_MODEL` specifies the path of a checkpoint, or a pre-trained model in the list below, which will be automatically downloaded. The pre-trained models are run at 256x256 resolution using 8 GPUs. We apply the strongest *Color + Translation + Cutout* DiffAugment to all baselines, which significantly gains the performance when training with partial data:
 
-| Model name                                                  | Dataset               | fid50k-ffhq |
+| Model name                                                  | Dataset               | fid50k-train |
 | ----------------------------------------------------------- | --------------------- | ----------- |
 | `mit-han-lab:stylegan2-ffhq.pkl`                | FFHQ (full, 70k samples) | **3.81** |
 | `mit-han-lab:DiffAugment-stylegan2-ffhq.pkl`    | FFHQ (full, 70k samples) | 4.24 |
