@@ -73,16 +73,23 @@ policy = 'color,translation,cutout' # If your dataset is as small as ours (e.g.,
 # Welcome to discover more DiffAugment transformations!
 
 ...
-# Training loop
+# Training loop: update D
 reals = sample_real_images() # a batch of real images
-fakes = generate_fake_images() # a batch of fake images
+z = sample_latent_vectors()
+fakes = Generator(z) # a batch of fake images
 real_scores = Discriminator(DiffAugment(reals, policy=policy))
 fake_scores = Discriminator(DiffAugment(fakes, policy=policy))
-# Calculating loss based on real_scores and fake_scores...
+# Calculating D's loss based on real_scores and fake_scores...
+...
+
+...
+# Training loop: update G
+z = sample_latent_vectors()
+fakes = Generator(z) # a batch of fake images
+fake_scores = Discriminator(DiffAugment(fakes, policy=policy))
+# Calculating G's loss based on fake_scores...
 ...
 ```
-
-In some codebases, *G* and *D*'s training iterations are implemented in a separate manner. Please make sure that the same DiffAugment policy is applied when training *G* as well as *D*.
 
 ## Citation
 
