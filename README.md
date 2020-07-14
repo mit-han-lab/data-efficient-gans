@@ -2,7 +2,7 @@
 
 #### [arXiv preprint](https://arxiv.org/pdf/2006.10738)
 
-<img src="imgs/obama.gif"/><img src="imgs/grumpy_cat.gif"/><img src="imgs/panda.gif"/>
+<img src="imgs/obama.gif"/><img src="imgs/grumpy_cat.gif"/><img src="imgs/panda.gif"/><br>
 <img src="imgs/bridge_of_sighs.gif"/><img src="imgs/medici_fountain.gif"/><img src="imgs/temple_of_heaven.gif"/>
 
 *Generated using only 100 images of Obama, grumpy cat, panda, the Bridge of Sighs, the Medici Fountain, the Temple of Heaven, without pre-training.*
