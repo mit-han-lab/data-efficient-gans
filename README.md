@@ -2,8 +2,8 @@
 
 #### [arXiv preprint](https://arxiv.org/pdf/2006.10738)
 
-<img src="imgs/obama.gif"/><img src="imgs/grumpy_cat.gif"/><img src="imgs/panda.gif"/><br>
-<img src="imgs/bridge_of_sighs.gif"/><img src="imgs/medici_fountain.gif"/><img src="imgs/temple_of_heaven.gif"/>
+<img src="imgs/obama.gif" width="100px"/><img src="imgs/grumpy_cat.gif" width="100px"/><img src="imgs/panda.gif" width="100px"/><br>
+<img src="imgs/bridge_of_sighs.gif" width="100px"/><img src="imgs/medici_fountain.gif" width="100px"/><img src="imgs/temple_of_heaven.gif" width="100px"/>
 
 *Generated using only 100 images of Obama, grumpy cat, panda, the Bridge of Sighs, the Medici Fountain, the Temple of Heaven, without pre-training.*
 
