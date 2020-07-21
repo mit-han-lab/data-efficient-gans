@@ -93,7 +93,7 @@ class TFRecordDataset:
 
             dset = tf.data.TFRecordDataset(tfr_file, compression_type='', buffer_size=buffer_mb << 20)
 
-            self._np_labels = np.zeros([1 << 30], dtype=np.int32)
+            self._np_labels = np.zeros([1 << 25], dtype=np.int32)
             if self.label_file is not None and max_label_size != 0:
                 self._np_labels = np.load(self.label_file).astype(np.int32)
                 self.label_size = self._np_labels.max() + 1
