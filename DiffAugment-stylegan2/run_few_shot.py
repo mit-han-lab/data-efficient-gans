@@ -42,7 +42,7 @@ def run(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, tota
     metric_args = EasyDict(cache_dir=dataset, num_repeats=num_repeats)
 
     desc = 'DiffAugment-stylegan2' if DiffAugment else 'stylegan2'
-    dataset_args = EasyDict(tfrecord_dir=dataset, resolution=resolution, from_tfrecords=True)
+    dataset_args = EasyDict(tfrecord_dir=dataset, resolution=resolution, shuffle_mb=256, prefetch_mb=256, from_tfrecords=True)
     desc += '-' + os.path.basename(dataset)
     if resolution is not None:
         desc += '-{}'.format(resolution)
