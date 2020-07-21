@@ -103,3 +103,7 @@ If you find this code helpful, please cite our paper:
   year={2020}
 }
 ```
+
+## Acknowledgements
+
+We thank TensorFlow Research Cloud for supporting this research with Cloud TPUs.
