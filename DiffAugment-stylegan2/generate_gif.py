@@ -9,7 +9,7 @@ from dnnlib import tflib
 from training import misc
 
 
-def run(resume, output, num_rows, num_cols, num_phases, transition_frames, static_frames, seed):
+def run(resume, output, num_rows, num_cols, resolution, num_phases, transition_frames, static_frames, seed):
     tflib.init_tf({'rnd.np_random_seed': seed})
     _, _, Gs = misc.load_pkl(resume)
     output_seq = []
@@ -25,7 +25,7 @@ def run(resume, output, num_rows, num_cols, num_phases, transition_frames, stati
         outputs = np.reshape(outputs, [num_rows, num_cols, *outputs.shape[1:]])
         outputs = np.concatenate(outputs, axis=1)
         outputs = np.concatenate(outputs, axis=1)
-        return Image.fromarray(outputs)
+        return Image.fromarray(outputs).resize((resolution * num_cols, resolution * num_rows), Image.ANTIALIAS)
     
     for i in range(num_phases):
         dlatents0 = Gs.components.mapping.run(latents[i - 1], None)
@@ -48,6 +48,7 @@ def main():
     parser.add_argument('-o', '--output', help='Output file name', required=True)
     parser.add_argument('--num-rows', help='Number of rows', default=2, type=int)
     parser.add_argument('--num-cols', help='Number of columns', default=3, type=int)
+    parser.add_argument('--resolution', help='Resolution of the output images', default=128, type=int)
     parser.add_argument('--num-phases', help='Number of phases', default=5, type=int)
     parser.add_argument('--transition-frames', help='Number of transition frames per phase', default=20, type=int)
     parser.add_argument('--static-frames', help='Number of static frames per phase', default=5, type=int)
