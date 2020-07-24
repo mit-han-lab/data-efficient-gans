@@ -136,7 +136,7 @@ def main():
     parser.add_argument('--result-dir', help='Root directory for run results (default: %(default)s)', default='results', metavar='DIR')
     parser.add_argument('--DiffAugment', help='Comma-separated list of DiffAugment policy', default='color,translation,cutout')
     parser.add_argument('--num-gpus', help='Number of GPUs (default: %(default)s)', default=1, type=int, metavar='N')
-    parser.add_argument('--batch-size', help='Batch size', default=None, type=int, metavar='N')
+    parser.add_argument('--batch-size', help='Batch size', default=16, type=int, metavar='N')
     parser.add_argument('--total-kimg', help='Training length in thousands of images (default: %(default)s)', metavar='KIMG', default=300, type=int)
     parser.add_argument('--ema-kimg', help='Half-life of exponential moving average in thousands of images', metavar='KIMG', default=None, type=int)
     parser.add_argument('--num-samples', help='Number of samples', default=None, type=int)

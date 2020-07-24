@@ -9,6 +9,8 @@ This repo is implemented upon and has the same dependencies as the official [Sty
 
 ## Generating an Interpolation Video
 
+<img src="../imgs/interp.gif"/>
+
 Run the following command to generate an interpolation video:
 
 ```bash
@@ -35,7 +37,7 @@ python run_cifar.py --dataset=WHICH_DATASET --num-samples=NUM_SAMPLES --num-gpus
 
 `WHICH_DATASET` specifies either `cifar10` or `cifar100` (default to `cifar10`). `NUM_SAMPLES` specifies the number of training samples to use, e.g., `5000` for 10% data or `10000` for 20% data. `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. Set `--DiffAugment=""` to run the baseline model.
 
-#### Pre-Trained Models and Evaluation
+### Pre-Trained Models and Evaluation
 
 To evaluate a model on CIFAR-10 or CIFAR-100, run the following command:
 
@@ -72,7 +74,7 @@ python run_ffhq.py --dataset=PATH_TO_THE_TFRECORDS_FOLDER --num-samples=NUM_SAMP
 
 If there are multiple `.tfrecords` files in the folder, the one with the highest resolution will be used.
 
-#### Pre-Trained Models and Evaluation
+### Pre-Trained Models and Evaluation
 
 Run the following command to evaluate a model on the FFHQ dataset:
 
@@ -88,14 +90,16 @@ Here, `PATH_TO_THE_TFRECORDS_FOLDER` specifies the folder containing the `tfreco
 | `mit-han-lab:DiffAugment-stylegan2-ffhq.pkl`    | FFHQ (full, 70k samples) | 4.24 |
 | `mit-han-lab:stylegan2-ffhq-30k.pkl`            | FFHQ (30k samples)  | 6.16 |
 | `mit-han-lab:DiffAugment-stylegan2-ffhq-30k.pkl` | FFHQ (30k samples)  | **5.05** |
-| `mit-han-lab:stylegan2-ffhq-10k.pkl`            | FFHQ (10k samples)  | 14.80 |
+| `mit-han-lab:stylegan2-ffhq-10k.pkl`            | FFHQ (10k samples)  | 14.75 |
 | `mit-han-lab:DiffAugment-stylegan2-ffhq-10k.pkl` | FFHQ (10k samples)  | **7.86** |
-| `mit-han-lab:stylegan2-ffhq-5k.pkl`             | FFHQ (5k samples)   | 26.51 |
+| `mit-han-lab:stylegan2-ffhq-5k.pkl`             | FFHQ (5k samples)   | 26.60 |
 | `mit-han-lab:DiffAugment-stylegan2-ffhq-5k.pkl` | FFHQ (5k samples)   | **10.45** |
-| `mit-han-lab:stylegan2-ffhq-1k.pkl`             | FFHQ (1k samples)   | 62.25 |
+| `mit-han-lab:stylegan2-ffhq-1k.pkl`             | FFHQ (1k samples)   | 62.16 |
 | `mit-han-lab:DiffAugment-stylegan2-ffhq-1k.pkl` | FFHQ (1k samples)   | **25.66** |
 
 ## Few-Shot Generation
+
+<img src="../imgs/few_shot-interp.jpg" width="1000px"/>
 
 To run the few-shot generation experiments on the 100-shot datasets:
 
@@ -103,22 +107,24 @@ To run the few-shot generation experiments on the 100-shot datasets:
 python run_few_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout
 ```
 
-or the following command to run on the AnimalFace datasets (with a smaller `gamma​` and a longer training length):
+or the following command to run on the AnimalFace datasets (with a longer training length):
 
 ```bash
-python run_few_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout --gamma=1 --total-kimg=600
+python run_few_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout --total-kimg=500
 ```
 
 `WHICH_DATASET` specifies `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_of_sighs`, `100-shot-medici_fountain`, `100-shot-temple_of_heaven`, `100-shot-wuzhen`, `AnimalFace-cat`, or `AnimalFace-dog`, which will be automatically downloaded, or the path of a folder containing your own training images. `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. The training typically takes several hours. Set `--DiffAugment=""` to run the baseline model. Specify `--resolution=RESOLUTION` to run at a different resolution from the default `256`. You may also fine-tune from an FFHQ pre-trained model listed above, e.g., by specifying `--resume=mit-han-lab:DiffAugment-stylegan2-ffhq.pkl --fmap-base=8192`.
 
-#### Preparing Your Own Datasets
+### Preparing Your Own Datasets
+
+<img src="../imgs/prof_han.jpg"/>
 
 Our method can generate good results using a small number of samples, e.g., 100 images. You may create a new dataset at such scale easily, but note that the generated results may be sensitive to the quality of the training samples. You may wish to crop the raw images and discard some bad training samples. After putting all images into a single folder, pass it to `WHICH_DATASET` in `run_few_shot.py`, the images will be resized to the specified resolution if necessary, and then enjoy the outputs! Note that,
 
 - The training length (default to 300k images) may be increased for larger datasets; note that there may be overfitting issues if the training is too long.
 - The cached files will be stored in the same folder with the training images. If the training images in your folder is *changed* after some run, please manually clean the cached files, `*.tfrecords` and `*.pkl`, from your image folder before rerun.
 
-#### Pre-Trained Models and Evaluation
+### Pre-Trained Models and Evaluation
 
 To evaluate a model on a few-shot dataset, run the following command:
 
@@ -129,13 +135,15 @@ python run_few_shot.py --dataset=WHICH_DATASET --resume=WHICH_MODEL --eval
 Here, `WHICH_DATASET` specifies the folder containing the training images, or one of our pre-defined datasets, including `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_of_sighs`, `100-shot-medici_fountain`, `100-shot-temple_of_heaven`, `100-shot-wuzhen`, `AnimalFace-cat`, and `AnimalFace-dog`, which will be automatically downloaded. `WHICH_MODEL` specifies the path of a checkpoint, or a pre-trained model in the following list, which will be automatically downloaded:
 | Model name | Dataset | fid5k-train |
 | --- | --- | --- |
-| `mit-han-lab:stylegan2-100-shot-obama.pkl` | `100-shot-obama` | 89.18 |
-| `mit-han-lab:DiffAugment-stylegan2-100-shot-obama.pkl` | `100-shot-obama` | **54.39** |
-| `mit-han-lab:stylegan2-100-shot-grumpy_cat.pkl` | `100-shot-grumpy_cat` | 61.97 |
-| `mit-han-lab:DiffAugment-stylegan2-100-shot-grumpy_cat.pkl` | `100-shot-grumpy_cat` | **29.90** |
-| `mit-han-lab:stylegan2-100-shot-panda.pkl` | `100-shot-panda` | 90.96 |
-| `mit-han-lab:DiffAugment-stylegan2-100-shot-panda.pkl` | `100-shot-panda` | **13.21** |
-| `mit-han-lab:stylegan2-AnimalFace-cat.pkl` | `AnimalFace-cat` | 95.75 |
-| `mit-han-lab:DiffAugment-stylegan2-AnimalFace-cat.pkl` | `AnimalFace-cat` | **46.51** |
-| `mit-han-lab:stylegan2-AnimalFace-dog.pkl` | `AnimalFace-dog` | 164.54 |
-| `mit-han-lab:DiffAugment-stylegan2-AnimalFace-dog.pkl` | `AnimalFace-dog` | **62.78** |
+| `mit-han-lab:stylegan2-100-shot-obama.pkl` | `100-shot-obama` | 80.20 |
+| `mit-han-lab:DiffAugment-stylegan2-100-shot-obama.pkl` | `100-shot-obama` | **46.87** |
+| `mit-han-lab:stylegan2-100-shot-grumpy_cat.pkl` | `100-shot-grumpy_cat` | 48.90 |
+| `mit-han-lab:DiffAugment-stylegan2-100-shot-grumpy_cat.pkl` | `100-shot-grumpy_cat` | **27.08** |
+| `mit-han-lab:stylegan2-100-shot-panda.pkl` | `100-shot-panda` | 34.27 |
+| `mit-han-lab:DiffAugment-stylegan2-100-shot-panda.pkl` | `100-shot-panda` | **12.06** |
+| `mit-han-lab:stylegan2-AnimalFace-cat.pkl` | `AnimalFace-cat` | 71.71 |
+| `mit-han-lab:DiffAugment-stylegan2-AnimalFace-cat.pkl` | `AnimalFace-cat` | **42.44** |
+| `mit-han-lab:stylegan2-AnimalFace-dog.pkl` | `AnimalFace-dog` | 130.19 |
+| `mit-han-lab:DiffAugment-stylegan2-AnimalFace-dog.pkl` | `AnimalFace-dog` | **58.85** |
+
+**[NOTE]** The pre-trained models for few-shot generation are updated on 07/23/2020, with a batch size of 16 instead of 32. To keep up to date, please manually clean the cached models in the `.stylegan2-cache` folder.
