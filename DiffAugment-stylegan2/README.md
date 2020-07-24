@@ -117,7 +117,7 @@ python run_few_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment
 
 ### Preparing Your Own Datasets
 
-<img src="../imgs/prof_han.jpg"/>
+<img src="../imgs/prof_han.jpg" width="1000px"/>
 
 Our method can generate good results using a small number of samples, e.g., 100 images. You may create a new dataset at such scale easily, but note that the generated results may be sensitive to the quality of the training samples. You may wish to crop the raw images and discard some bad training samples. After putting all images into a single folder, pass it to `WHICH_DATASET` in `run_few_shot.py`, the images will be resized to the specified resolution if necessary, and then enjoy the outputs! Note that,
 
