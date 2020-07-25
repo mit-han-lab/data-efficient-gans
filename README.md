@@ -6,7 +6,7 @@
 
 *Generated using only 100 images of Obama, grumpy cats, pandas, the Bridge of Sighs, the Medici Fountain, the Temple of Heaven, without pre-training.*
 
-**[NEW!]** Our Colab tutorial is released! [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/gist/zsyzzsoft/5fbb71b9bf9a3217576bebae5de46fc2/data-efficient-gans.ipynb)
+**[NEW!]** Our [Colab tutorial](https://colab.research.google.com/gist/zsyzzsoft/5fbb71b9bf9a3217576bebae5de46fc2/data-efficient-gans.ipynb) is released! [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/gist/zsyzzsoft/5fbb71b9bf9a3217576bebae5de46fc2/data-efficient-gans.ipynb)
 
 **[NEW!]** FFHQ training is supported! See the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2#FFHQ) README.
 
