@@ -107,4 +107,5 @@ If you find this code helpful, please cite our paper:
 
 ## Acknowledgements
 
-We thank TensorFlow Research Cloud for supporting this research with Cloud TPUs.
+We thank NSF Career Award #1943349, MIT-IBM Watson AI Lab, Google, Adobe, and Sony for supporting this research. We thank TensorFlow Research Cloud for supporting this research with Cloud TPUs. We thank William S. Peebles and Yijun Li for helpful comments.
+
