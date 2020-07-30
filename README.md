@@ -1,6 +1,6 @@
 # Data-Efficient GANs with DiffAugment
 
-#### [arXiv preprint](https://arxiv.org/pdf/2006.10738)
+### [project](https://data-efficient-gans.mit.edu/) | [paper](https://arxiv.org/pdf/2006.10738)
 
 <img src="imgs/interp.gif"/>
 
