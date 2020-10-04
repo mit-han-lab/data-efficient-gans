@@ -27,7 +27,7 @@ To run the CIFAR experiments with 100% data:
 python run_cifar.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,cutout
 ```
 
-`WHICH_DATASET` specifies either `cifar10` or `cifar100` (default to `cifar10`). `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. The training typically takes around 2 days. Set `--DiffAugment=""` to run the baseline model.
+`WHICH_DATASET` specifies either `cifar10` or `cifar100` (defaults to `cifar10`). `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. The training typically takes around 2 days. Set `--DiffAugment=""` to run the baseline model.
 
 To run the CIFAR experiments with partial data:
 
@@ -35,7 +35,7 @@ To run the CIFAR experiments with partial data:
 python run_cifar.py --dataset=WHICH_DATASET --num-samples=NUM_SAMPLES --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout
 ```
 
-`WHICH_DATASET` specifies either `cifar10` or `cifar100` (default to `cifar10`). `NUM_SAMPLES` specifies the number of training samples to use, e.g., `5000` for 10% data or `10000` for 20% data. `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. Set `--DiffAugment=""` to run the baseline model.
+`WHICH_DATASET` specifies either `cifar10` or `cifar100` (defaults to `cifar10`). `NUM_SAMPLES` specifies the number of training samples to use, e.g., `5000` for 10% data or `10000` for 20% data. `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. Set `--DiffAugment=""` to run the baseline model.
 
 ### Pre-Trained Models and Evaluation
 
@@ -45,7 +45,7 @@ To evaluate a model on CIFAR-10 or CIFAR-100, run the following command:
 python run_cifar.py --dataset=WHICH_DATASET --resume=WHICH_MODEL --eval
 ```
 
-Here, `WHICH_DATASET` specifies either `cifar10` or `cifar100` (default to `cifar10`); `WHICH_MODEL` specifies the path of a checkpoint, or a pre-trained model in the following list, which will be automatically downloaded:
+Here, `WHICH_DATASET` specifies either `cifar10` or `cifar100` (defaults to `cifar10`); `WHICH_MODEL` specifies the path of a checkpoint, or a pre-trained model in the following list, which will be automatically downloaded:
 
 | Model name | Dataset | is10k | fid10k |
 | --- | --- | --- | --- |
@@ -64,25 +64,25 @@ Here, `WHICH_DATASET` specifies either `cifar10` or `cifar100` (default to `cifa
 
 The evaluation results of the pre-trained models should be close to these numbers. Specify `--num-repeats=REPEATS` to compute means and standard deviations over multiple evaluation runs. A standard deviation of less than 1% relatively is expected.
 
-## FFHQ
+## FFHQ and LSUN
 
-The NVIDIA's FFHQ dataset can be downloaded [here](https://drive.google.com/drive/folders/1M24jfI-Ylb-k2EGhELSnxssWi9wGUokg). If you want to run at 256x256 resolution for example, only `ffhq-r08.tfrecords` needs to be downloaded. Pass the folder containing the `.tfrecords` file to `PATH_TO_THE_TFRECORDS_FOLDER` below:
+The NVIDIA's FFHQ dataset can be downloaded [here](https://drive.google.com/drive/folders/1M24jfI-Ylb-k2EGhELSnxssWi9wGUokg). If you want to run at 256x256 resolution for example, only `ffhq-r08.tfrecords` needs to be downloaded. The LSUN datasets (in LMDB format) can be downloaded [here](https://www.yf.io/p/lsun). Pass the folder containing the `.tfrecords` or `.mdb` file to `PATH_TO_THE_TFRECORDS_OR_LMDB_FOLDER` below:
 
 ```bash
-python run_ffhq.py --dataset=PATH_TO_THE_TFRECORDS_FOLDER --num-samples=NUM_SAMPLES --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout
+python run_ffhq.py --dataset=PATH_TO_THE_TFRECORDS_OR_LMDB_FOLDER --num-samples=NUM_SAMPLES --num-gpus=NUM_GPUS --resolution=256 --DiffAugment=color,translation,cutout
 ```
 
 If there are multiple `.tfrecords` files in the folder, the one with the highest resolution will be used.
 
 ### Pre-Trained Models and Evaluation
 
-Run the following command to evaluate a model on the FFHQ dataset:
+Run the following command to evaluate a model on the FFHQ/LSUN dataset:
 
 ```bash
-python run_ffhq.py --dataset=PATH_TO_THE_TFRECORDS_FOLDER --resume=WHICH_MODEL --num-gpus=NUM_GPUS --eval
+python run_ffhq.py --dataset=PATH_TO_THE_TFRECORDS_OR_LMDB_FOLDER --resume=WHICH_MODEL --num-gpus=NUM_GPUS --eval
 ```
 
-Here, `PATH_TO_THE_TFRECORDS_FOLDER` specifies the folder containing the `tfrecords` file. `WHICH_MODEL` specifies the path of a checkpoint, or a pre-trained model in the list below, which will be automatically downloaded. The pre-trained models are run at 256x256 resolution using 8 GPUs. We apply the strongest *Color + Translation + Cutout* DiffAugment to all baselines, which significantly gains the performance when training with partial data:
+Here, `PATH_TO_THE_TFRECORDS_OR_LMDB_FOLDER` specifies the folder containing the `.tfrecords` or `.mdb` file. `WHICH_MODEL` specifies the path of a checkpoint, or a pre-trained model in the list below, which will be automatically downloaded. The pre-trained models are run at 256x256 resolution using 8 GPUs. We apply the strongest *Color + Translation + Cutout* DiffAugment to all the baselines, which significantly gains the performance when training with partial data:
 
 | Model name                                                  | Dataset               | fid50k-train |
 | ----------------------------------------------------------- | --------------------- | ----------- |
@@ -96,40 +96,46 @@ Here, `PATH_TO_THE_TFRECORDS_FOLDER` specifies the folder containing the `tfreco
 | `mit-han-lab:DiffAugment-stylegan2-ffhq-5k.pkl` | FFHQ (5k samples)   | **10.45** |
 | `mit-han-lab:stylegan2-ffhq-1k.pkl`             | FFHQ (1k samples)   | 62.16 |
 | `mit-han-lab:DiffAugment-stylegan2-ffhq-1k.pkl` | FFHQ (1k samples)   | **25.66** |
+| `mit-han-lab:stylegan2-lsun-cat-30k.pkl`            | LSUN-Cat (30k samples)  | 10.12 |
+| `mit-han-lab:DiffAugment-stylegan2-lsun-cat-30k.pkl` | LSUN-Cat (30k samples)  | **9.68** |
+| `mit-han-lab:stylegan2-lsun-cat-10k.pkl`            | LSUN-Cat (10k samples)  | 17.93 |
+| `mit-han-lab:DiffAugment-stylegan2-lsun-cat-10k.pkl` | LSUN-Cat (10k samples)  | **12.07** |
+| `mit-han-lab:stylegan2-lsun-cat-5k.pkl`             | LSUN-Cat (5k samples)   | 34.69 |
+| `mit-han-lab:DiffAugment-stylegan2-lsun-cat-5k.pkl` | LSUN-Cat (5k samples)   | **16.11** |
+| `mit-han-lab:stylegan2-lsun-cat-1k.pkl`             | LSUN-Cat (1k samples)   | 182.85 |
+| `mit-han-lab:DiffAugment-stylegan2-lsun-cat-1k.pkl` | LSUN-Cat (1k samples)   | **42.26** |
 
-## Few-Shot Generation
+## 100-Shot Generation
 
-<img src="../imgs/few_shot-interp.jpg" width="1000px"/>
+<img src="../imgs/100-shot-interp.jpg" width="1000px"/>
 
-To run the few-shot generation experiments on the 100-shot datasets:
+To run the 100-shot generation experiments on the 100-shot datasets:
 
 ```bash
-python run_few_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout
+python run_100_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout
 ```
 
 or the following command to run on the AnimalFace datasets (with a longer training length):
 
 ```bash
-python run_few_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout --total-kimg=500
+python run_100_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout --total-kimg=500
 ```
 
 `WHICH_DATASET` specifies `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_of_sighs`, `100-shot-medici_fountain`, `100-shot-temple_of_heaven`, `100-shot-wuzhen`, `AnimalFace-cat`, or `AnimalFace-dog`, which will be automatically downloaded, or the path of a folder containing your own training images. `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. The training typically takes several hours. Set `--DiffAugment=""` to run the baseline model. Specify `--resolution=RESOLUTION` to run at a different resolution from the default `256`. You may also fine-tune from an FFHQ pre-trained model listed above, e.g., by specifying `--resume=mit-han-lab:DiffAugment-stylegan2-ffhq.pkl --fmap-base=8192`.
 
 ### Preparing Your Own Datasets
 
-<img src="../imgs/prof_han.jpg" width="1000px"/>
+Our method can generate good results using a small number of samples, e.g., 100 images. You may create a new dataset at such scale easily, but note that the generated results may be sensitive to the quality of the training samples. You may wish to crop the raw images and discard some bad training samples. After putting all images into a single folder, pass it to `WHICH_DATASET` in `run_100_shot.py`, the images will be resized to the specified resolution if necessary, and then enjoy the outputs! Note that,
 
-Our method can generate good results using a small number of samples, e.g., 100 images. You may create a new dataset at such scale easily, but note that the generated results may be sensitive to the quality of the training samples. You may wish to crop the raw images and discard some bad training samples. After putting all images into a single folder, pass it to `WHICH_DATASET` in `run_few_shot.py`, the images will be resized to the specified resolution if necessary, and then enjoy the outputs! Note that,
-
-- The training length (default to 300k images) may be increased for larger datasets; note that there may be overfitting issues if the training is too long.
+- The training length (defaults to 300k images) may be increased for larger datasets, but there may be overfitting issues if the training is too long.
 - The cached files will be stored in the same folder with the training images. If the training images in your folder is *changed* after some run, please manually clean the cached files, `*.tfrecords` and `*.pkl`, from your image folder before rerun.
 
 ### Pre-Trained Models and Evaluation
 
-To evaluate a model on a few-shot dataset, run the following command:
+To evaluate a model on a 100-shot dataset, run the following command:
 
 ```bash
-python run_few_shot.py --dataset=WHICH_DATASET --resume=WHICH_MODEL --eval
+python run_100_shot.py --dataset=WHICH_DATASET --resume=WHICH_MODEL --eval
 ```
 
 Here, `WHICH_DATASET` specifies the folder containing the training images, or one of our pre-defined datasets, including `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_of_sighs`, `100-shot-medici_fountain`, `100-shot-temple_of_heaven`, `100-shot-wuzhen`, `AnimalFace-cat`, and `AnimalFace-dog`, which will be automatically downloaded. `WHICH_MODEL` specifies the path of a checkpoint, or a pre-trained model in the following list, which will be automatically downloaded:
@@ -146,4 +152,4 @@ Here, `WHICH_DATASET` specifies the folder containing the training images, or on
 | `mit-han-lab:stylegan2-AnimalFace-dog.pkl` | `AnimalFace-dog` | 130.19 |
 | `mit-han-lab:DiffAugment-stylegan2-AnimalFace-dog.pkl` | `AnimalFace-dog` | **58.85** |
 
-**[NOTE]** The pre-trained models for few-shot generation are updated on 07/23/2020, with a batch size of 16 instead of 32. To keep up to date, please manually clean the cached models in the `.stylegan2-cache` folder.
+**[NOTE]** The pre-trained models for 100-shot generation are updated on 07/23/2020, with a batch size of 16 instead of 32. To keep up to date, please manually clean the cached models in the `.stylegan2-cache` folder.

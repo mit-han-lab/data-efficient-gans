@@ -16,7 +16,7 @@ To evaluate a model on CIFAR-10 or CIFAR-100, run the following command:
 CUDA_VISIBLE_DEVICES=0,1 python eval.py --dataset=WHICH_DATASET --network=WHICH_MODEL
 ```
 
-Here, `WHICH_DATASET` specifies either `C10` (CIFAR-10) or `C100` (CIFAR-100), default to `C10`; `WHICH_MODEL` specifies the path of a checkpoint containing the generator's weights (typically this should be the path of a file named `G_ema_best.pth` in the `weights` folder), or a pre-trained model in the following list, which will be automatically downloaded:
+Here, `WHICH_DATASET` specifies either `C10` (CIFAR-10, default) or `C100` (CIFAR-100); `WHICH_MODEL` specifies the path of a checkpoint containing the generator's weights (typically this should be the path of a file named `G_ema_best.pth` in the `weights` folder), or a pre-trained model in the following list, which will be automatically downloaded:
 
 | Model name                                           | Dataset               | is10k     | fid10k    |
 | ---------------------------------------------------- | --------------------- | --------- | --------- |
