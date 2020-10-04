@@ -152,8 +152,4 @@ Here, `WHICH_DATASET` specifies the folder containing the training images, or on
 | `mit-han-lab:stylegan2-AnimalFace-dog.pkl` | `AnimalFace-dog` | 130.19 |
 | `mit-han-lab:DiffAugment-stylegan2-AnimalFace-dog.pkl` | `AnimalFace-dog` | **58.85** |
 
-<<<<<<< HEAD
 **[NOTE]** The pre-trained models for 100-shot generation are updated on 07/23/2020, with a batch size of 16 instead of 32. To keep up to date, please manually clean the cached models in the `.stylegan2-cache` folder.
-=======
-**[NOTE]** The pre-trained models for few-shot generation are updated on 07/23/2020, with a batch size of 16 instead of 32. To keep up to date, please manually clean the cached models in the `.stylegan2-cache` folder.
->>>>>>> e2287f2c99c15fc68a420526dcb231daef67e8ca
