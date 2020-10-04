@@ -96,7 +96,7 @@ def run(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, tota
 # ----------------------------------------------------------------------------
 
 
-def run_eval(dataset, resolution, result_dir, DiffAugment, num_gpus, batch_size, total_kimg, ema_kimg, num_samples, gamma, fmap_base, fmap_max, latent_size, mirror_augment, impl, metrics, resume, resume_kimg, num_repeats, eval):
+def run_eval(dataset, resolution, num_gpus, metrics, resume, num_repeats, **kwargs):
     dataset = dataset_tool.create_dataset(dataset, resolution)
     print('Evaluating metrics "%s" for "%s"...' % (','.join(metrics), resume))
     tflib.init_tf()
