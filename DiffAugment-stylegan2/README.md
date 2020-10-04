@@ -56,7 +56,7 @@ Here, `WHICH_DATASET` specifies either `cifar10` or `cifar100` (defaults to `cif
 | `mit-han-lab:stylegan2-cifar10-0.1.pkl` | `cifar10` (10% data) | 7.33 | 36.02 |
 | `mit-han-lab:DiffAugment-stylegan2-cifar10-0.1.pkl` | `cifar10` (10% data) | **8.84** | **14.50** |
 | `mit-han-lab:stylegan2-cifar100.pkl` | `cifar100` | 9.51 | 16.54 |
-| `mit-han-lab:DiffAugment-stylegan2-cifar10.pkl` | `cifar100` | **10.04** | **15.22** |
+| `mit-han-lab:DiffAugment-stylegan2-cifar100.pkl` | `cifar100` | **10.04** | **15.22** |
 | `mit-han-lab:stylegan2-cifar100-0.2.pkl` | `cifar100` (20% data) | 7.86 | 32.30 |
 | `mit-han-lab:DiffAugment-stylegan2-cifar100-0.2.pkl` | `cifar100` (20% data) | **9.82** | **16.65** |
 | `mit-han-lab:stylegan2-cifar100-0.1.pkl` | `cifar100` (10% data) | 7.01 | 45.87 |
@@ -152,4 +152,8 @@ Here, `WHICH_DATASET` specifies the folder containing the training images, or on
 | `mit-han-lab:stylegan2-AnimalFace-dog.pkl` | `AnimalFace-dog` | 130.19 |
 | `mit-han-lab:DiffAugment-stylegan2-AnimalFace-dog.pkl` | `AnimalFace-dog` | **58.85** |
 
+<<<<<<< HEAD
 **[NOTE]** The pre-trained models for 100-shot generation are updated on 07/23/2020, with a batch size of 16 instead of 32. To keep up to date, please manually clean the cached models in the `.stylegan2-cache` folder.
+=======
+**[NOTE]** The pre-trained models for few-shot generation are updated on 07/23/2020, with a batch size of 16 instead of 32. To keep up to date, please manually clean the cached models in the `.stylegan2-cache` folder.
+>>>>>>> e2287f2c99c15fc68a420526dcb231daef67e8ca
