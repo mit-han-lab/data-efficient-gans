@@ -18,9 +18,9 @@
 
 This repository contains our implementation of Differentiable Augmentation (DiffAugment) in both PyTorch and TensorFlow. It can be used to significantly improve the data efficiency for GAN training. We have provided the TensorFlow code of [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2), the PyTorch code of [DiffAugment-biggan-cifar](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-cifar) for GPU training, and the TensorFlow code of [DiffAugment-biggan-imagenet](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-imagenet) for TPU training.
 
-<img src="imgs/100-shot-comparison.jpg" width="1000px"/>
+<img src="imgs/low-shot-comparison.jpg" width="1000px"/>
 
-*100-shot generation without pre-training. With DiffAugment, our model can generate high-fidelity images using only 100 Obama portraits, grumpy cats, or pandas from our collected 100-shot datasets, 160 cats or 389 dogs from the AnimalFace dataset at 256×256 resolution.*
+*Low-shot generation without pre-training. With DiffAugment, our model can generate high-fidelity images using only 100 Obama portraits, grumpy cats, or pandas from our collected 100-shot datasets, 160 cats or 389 dogs from the AnimalFace dataset at 256×256 resolution.*
 
 <img src="imgs/cifar10-results.jpg" width="1000px"/>
 
@@ -49,7 +49,7 @@ python generate_gif.py -r mit-han-lab:DiffAugment-stylegan2-100-shot-obama.pkl -
 or to train a new model:
 
 ```bash
-python run_100_shot.py --dataset=100-shot-obama --num-gpus=4
+python run_low_shot.py --dataset=100-shot-obama --num-gpus=4
 ```
 
 You may also try out `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_of_sighs`, `100-shot-medici_fountain`, `100-shot-temple_of_heaven`, `100-shot-wuzhen`, or the folder containing your own training images. Please refer to the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2#100-shot-generation) README for the dependencies and details.

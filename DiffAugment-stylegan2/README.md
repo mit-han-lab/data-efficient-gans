@@ -105,37 +105,37 @@ Here, `PATH_TO_THE_TFRECORDS_OR_LMDB_FOLDER` specifies the folder containing the
 | `mit-han-lab:stylegan2-lsun-cat-1k.pkl`             | LSUN-Cat (1k samples)   | 182.85 |
 | `mit-han-lab:DiffAugment-stylegan2-lsun-cat-1k.pkl` | LSUN-Cat (1k samples)   | **42.26** |
 
-## 100-Shot Generation
+## Low-Shot Generation
 
-<img src="../imgs/100-shot-interp.jpg" width="1000px"/>
+<img src="../imgs/low-shot-interp.jpg" width="1000px"/>
 
-To run the 100-shot generation experiments on the 100-shot datasets:
+To run the low-shot generation experiments on the 100-shot datasets:
 
 ```bash
-python run_100_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout
+python run_low_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout
 ```
 
 or the following command to run on the AnimalFace datasets (with a longer training length):
 
 ```bash
-python run_100_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout --total-kimg=500
+python run_low_shot.py --dataset=WHICH_DATASET --num-gpus=NUM_GPUS --DiffAugment=color,translation,cutout --total-kimg=500
 ```
 
 `WHICH_DATASET` specifies `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_of_sighs`, `100-shot-medici_fountain`, `100-shot-temple_of_heaven`, `100-shot-wuzhen`, `AnimalFace-cat`, or `AnimalFace-dog`, which will be automatically downloaded, or the path of a folder containing your own training images. `NUM_GPUS` specifies the number of GPUs to use; we recommend using 4 or 8 GPUs to replicate our results. The training typically takes several hours. Set `--DiffAugment=""` to run the baseline model. Specify `--resolution=RESOLUTION` to run at a different resolution from the default `256`. You may also fine-tune from an FFHQ pre-trained model listed above, e.g., by specifying `--resume=mit-han-lab:DiffAugment-stylegan2-ffhq.pkl --fmap-base=8192`.
 
 ### Preparing Your Own Datasets
 
-Our method can generate good results using a small number of samples, e.g., 100 images. You may create a new dataset at such scale easily, but note that the generated results may be sensitive to the quality of the training samples. You may wish to crop the raw images and discard some bad training samples. After putting all images into a single folder, pass it to `WHICH_DATASET` in `run_100_shot.py`, the images will be resized to the specified resolution if necessary, and then enjoy the outputs! Note that,
+Our method can generate good results using a small number of samples, e.g., 100 images. You may create a new dataset at such scale easily, but note that the generated results may be sensitive to the quality of the training samples. You may wish to crop the raw images and discard some bad training samples. After putting all images into a single folder, pass it to `WHICH_DATASET` in `run_low_shot.py`, the images will be resized to the specified resolution if necessary, and then enjoy the outputs! Note that,
 
 - The training length (defaults to 300k images) may be increased for larger datasets, but there may be overfitting issues if the training is too long.
 - The cached files will be stored in the same folder with the training images. If the training images in your folder is *changed* after some run, please manually clean the cached files, `*.tfrecords` and `*.pkl`, from your image folder before rerun.
 
 ### Pre-Trained Models and Evaluation
 
-To evaluate a model on a 100-shot dataset, run the following command:
+To evaluate a model on a low-shot generation dataset, run the following command:
 
 ```bash
-python run_100_shot.py --dataset=WHICH_DATASET --resume=WHICH_MODEL --eval
+python run_low_shot.py --dataset=WHICH_DATASET --resume=WHICH_MODEL --eval
 ```
 
 Here, `WHICH_DATASET` specifies the folder containing the training images, or one of our pre-defined datasets, including `100-shot-obama`, `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_of_sighs`, `100-shot-medici_fountain`, `100-shot-temple_of_heaven`, `100-shot-wuzhen`, `AnimalFace-cat`, and `AnimalFace-dog`, which will be automatically downloaded. `WHICH_MODEL` specifies the path of a checkpoint, or a pre-trained model in the following list, which will be automatically downloaded:
