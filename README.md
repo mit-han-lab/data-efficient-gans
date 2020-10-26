@@ -28,7 +28,7 @@ This repository contains our implementation of Differentiable Augmentation (Diff
 
 Differentiable Augmentation for Data-Efficient GAN Training<br>
 [Shengyu Zhao](https://scholar.google.com/citations?user=gLCdw70AAAAJ), [Zhijian Liu](http://zhijianliu.com/), [Ji Lin](http://linji.me/), [Jun-Yan Zhu](https://www.cs.cmu.edu/~junyanz/), and [Song Han](https://songhan.mit.edu/)<br>
-MIT, Tsinghua University, Adobe Research<br>
+MIT, Tsinghua University, Adobe Research, CMU<br>
 [arXiv](https://arxiv.org/pdf/2006.10738.pdf)
 
 
