@@ -1,6 +1,6 @@
 # Data-Efficient GANs with DiffAugment
 
-### [project](https://data-efficient-gans.mit.edu/) | [paper](https://arxiv.org/pdf/2006.10738) | [datasets](https://hanlab.mit.edu/projects/data-efficient-gans/datasets/)
+### [project](https://data-efficient-gans.mit.edu/) | [paper](https://arxiv.org/pdf/2006.10738) | [datasets](https://hanlab.mit.edu/projects/data-efficient-gans/datasets/) | [video](https://www.youtube.com/watch?v=SsqcjS6SVM0)
 
 <img src="imgs/interp.gif"/>
 
