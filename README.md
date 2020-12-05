@@ -1,6 +1,6 @@
 # Data-Efficient GANs with DiffAugment
 
-### [project](https://data-efficient-gans.mit.edu/) | [paper](https://arxiv.org/pdf/2006.10738) | [datasets](https://hanlab.mit.edu/projects/data-efficient-gans/datasets/) | [video](https://www.youtube.com/watch?v=SsqcjS6SVM0)
+### [project](https://data-efficient-gans.mit.edu/) | [paper](https://arxiv.org/pdf/2006.10738) | [datasets](https://hanlab.mit.edu/projects/data-efficient-gans/datasets/) | [video](https://www.youtube.com/watch?v=SsqcjS6SVM0) | [slides](https://hanlab.mit.edu/projects/data-efficient-gans/slides.pdf)
 
 <img src="imgs/interp.gif"/>
 
@@ -70,7 +70,7 @@ To help you use DiffAugment in your own codebase, we provide portable DiffAugmen
 from DiffAugment_pytorch import DiffAugment
 # from DiffAugment_tf import DiffAugment
 policy = 'color,translation,cutout' # If your dataset is as small as ours (e.g.,
-# 100 images), we recommend using the strongest Color + Translation + Cutout.
+# hundreds of images), we recommend using the strongest Color + Translation + Cutout.
 # For large datasets, try using a subset of transformations in ['color', 'translation', 'cutout'].
 # Welcome to discover more DiffAugment transformations!
 
@@ -92,6 +92,10 @@ fake_scores = Discriminator(DiffAugment(fakes, policy=policy))
 # Calculating G's loss based on fake_scores...
 ...
 ```
+
+We have implemented Color, Translation, and Cutout DiffAugment as visualized below:
+
+<img src="imgs/augmentations.jpg" width="800px"/>
 
 ## Citation
 
