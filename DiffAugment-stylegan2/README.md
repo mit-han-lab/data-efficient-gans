@@ -2,7 +2,7 @@
 
 This repo is implemented upon and has the same dependencies as the official [StyleGAN2 repo](https://github.com/NVlabs/stylegan2). Specifically,
 
-- TensorFlow 1.14 or 1.15 with GPU support.
+- TensorFlow 1.15 with GPU support.
 - `tensorflow-datasets` version <= 2.1.0 should be installed to run on CIFAR, e.g., `pip install tensorflow-datasets==2.1.0`.
 - We recommend using 4 or 8 GPUs with at least 12 GB of DRAM for training.
 - If you are facing problems with `nvcc` (when building custom ops of StyleGAN2), this can be circumvented by specifying `--impl=ref` in training at the cost of a slightly longer training time.
