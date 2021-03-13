@@ -13,7 +13,7 @@ python train.py --outdir=training-runs --data=https://hanlab.mit.edu/projects/da
 
 ## Pre-Trained Models
 
-The following command is an example of generation with our pre-trained 100-shot Obama model. It will automatically convert a TensorFlow model to the PyTorch version. See [here](https://hanlab.mit.edu/projects/data-efficient-gans/models/) for a list of our provided pre-trained models. You may also use `legacy.py` to manually convert our pre-trained models to the compatible PyTorch version.
+The following command is an example of generation with our pre-trained 100-shot Obama model. It will automatically convert a TensorFlow model to the PyTorch version. See [here](https://hanlab.mit.edu/projects/data-efficient-gans/models/) for a list of our provided pre-trained models. You may also use `legacy.py` to manually convert our pre-trained StyleGAN2 models to the compatible PyTorch version.
 ```bash
 python generate.py --outdir=out --seeds=0-3 --network=https://hanlab.mit.edu/projects/data-efficient-gans/models/DiffAugment-stylegan2-100-shot-obama.pkl
 ```
