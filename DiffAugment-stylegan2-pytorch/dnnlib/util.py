@@ -416,7 +416,8 @@ def open_url(url: str, cache_dir: str = None, num_attempts: int = 10, verbose: b
 
     url_md5 = hashlib.md5(url.encode("utf-8")).hexdigest()
     if cache:
-        cache_files = glob.glob(os.path.join(cache_dir, url_md5 + "_*"))
+        cache_dir = os.path.join(cache_dir, url_md5)
+        cache_files = glob.glob(os.path.join(cache_dir, "*"))
         if len(cache_files) == 1:
             filename = cache_files[0]
             return filename if return_filename else open(filename, "rb")
@@ -462,9 +463,9 @@ def open_url(url: str, cache_dir: str = None, num_attempts: int = 10, verbose: b
 
     # Save to cache.
     if cache:
-        safe_name = re.sub(r"[^0-9a-zA-Z-._]", "_", url_name)
-        cache_file = os.path.join(cache_dir, url_md5 + "_" + safe_name)
-        temp_file = os.path.join(cache_dir, "tmp_" + uuid.uuid4().hex + "_" + url_md5 + "_" + safe_name)
+        filename = os.path.basename(url_name)
+        cache_file = os.path.join(cache_dir, filename)
+        temp_file = os.path.join(cache_dir, "tmp_" + uuid.uuid4().hex + "_" + filename)
         os.makedirs(cache_dir, exist_ok=True)
         with open(temp_file, "wb") as f:
             f.write(url_data)

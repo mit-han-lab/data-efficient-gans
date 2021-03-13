@@ -134,7 +134,7 @@ def convert_tf_generator(tf_G):
             w_avg_beta          = kwarg('w_avg_beta',           0.995,  none=1),
         ),
         synthesis_kwargs = dnnlib.EasyDict(
-            channel_base        = kwarg('fmap_base',            16384) * 2,
+            channel_base        = kwarg('fmap_base',            None),
             channel_max         = kwarg('fmap_max',             512),
             num_fp16_res        = kwarg('num_fp16_res',         0),
             conv_clamp          = kwarg('conv_clamp',           None),
@@ -150,6 +150,7 @@ def convert_tf_generator(tf_G):
     kwarg('truncation_cutoff')
     kwarg('style_mixing_prob')
     kwarg('structure')
+    kwarg('impl')
     unknown_kwargs = list(set(tf_kwargs.keys()) - known_kwargs)
     if len(unknown_kwargs) > 0:
         raise ValueError('Unknown TensorFlow kwarg', unknown_kwargs[0])
@@ -163,6 +164,15 @@ def convert_tf_generator(tf_G):
             tf_params[f'{r}x{r}/ToRGB/{match.group(2)}'] = value
             kwargs.synthesis.kwargs.architecture = 'orig'
     #for name, value in tf_params.items(): print(f'{name:<50s}{list(value.shape)}')
+
+    if kwargs.synthesis_kwargs.channel_base is None:
+        top_level_weight = tf_params.get(f'synthesis/{kwargs.img_resolution}x{kwargs.img_resolution}/Conv1/weight', None)
+        if top_level_weight is not None:
+            kwargs.synthesis_kwargs.channel_base = top_level_weight.shape[-1] * kwargs.img_resolution
+        else:
+            kwargs.synthesis_kwargs.channel_base = 32768
+    else:
+        kwargs.synthesis_kwargs.channel_base *= 2
 
     # Convert params.
     from training import networks
@@ -221,7 +231,7 @@ def convert_tf_discriminator(tf_D):
         img_resolution          = kwarg('resolution',           1024),
         img_channels            = kwarg('num_channels',         3),
         architecture            = kwarg('architecture',         'resnet'),
-        channel_base            = kwarg('fmap_base',            16384) * 2,
+        channel_base            = kwarg('fmap_base',            None),
         channel_max             = kwarg('fmap_max',             512),
         num_fp16_res            = kwarg('num_fp16_res',         0),
         conv_clamp              = kwarg('conv_clamp',           None),
@@ -247,6 +257,7 @@ def convert_tf_discriminator(tf_D):
 
     # Check for unknown kwargs.
     kwarg('structure')
+    kwarg('impl')
     unknown_kwargs = list(set(tf_kwargs.keys()) - known_kwargs)
     if len(unknown_kwargs) > 0:
         raise ValueError('Unknown TensorFlow kwarg', unknown_kwargs[0])
@@ -260,6 +271,15 @@ def convert_tf_discriminator(tf_D):
             tf_params[f'{r}x{r}/FromRGB/{match.group(2)}'] = value
             kwargs.architecture = 'orig'
     #for name, value in tf_params.items(): print(f'{name:<50s}{list(value.shape)}')
+
+    if kwargs.channel_base is None:
+        top_level_weight = tf_params.get(f'{kwargs.img_resolution}x{kwargs.img_resolution}/Conv0/weight', None)
+        if top_level_weight is not None:
+            kwargs.channel_base = top_level_weight.shape[-1] * kwargs.img_resolution
+        else:
+            kwargs.channel_base = 32768
+    else:
+        kwargs.channel_base *= 2
 
     # Convert params.
     from training import networks

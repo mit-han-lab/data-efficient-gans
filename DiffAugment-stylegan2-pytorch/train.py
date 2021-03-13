@@ -49,6 +49,7 @@ def setup_training_loop_kwargs(
     batch      = None, # Override batch size: <int>
 
     # Discriminator augmentation.
+    diffaugment= None, # Comma-separated list of DiffAugment policy, default = 'color,translation,cutout'
     aug        = None, # Augmentation mode: 'ada' (default), 'noaug', 'fixed'
     p          = None, # Specify p for 'fixed' (required): <float>
     target     = None, # Override ADA target for 'ada': <float>, default = depends on aug
@@ -147,11 +148,12 @@ def setup_training_loop_kwargs(
     # ------------------------------------
 
     if cfg is None:
-        cfg = 'auto'
+        cfg = 'low_shot'
     assert isinstance(cfg, str)
     desc += f'-{cfg}'
 
     cfg_specs = {
+        'low_shot':  dict(ref_gpus=-1, kimg=300,    mb=8,  mbstd=4,  fmaps=1,   lrate=0.002,  gamma=10,   ema=10,  ramp=None, map=2, snap=10),
         'auto':      dict(ref_gpus=-1, kimg=25000,  mb=-1, mbstd=-1, fmaps=-1,  lrate=-1,     gamma=-1,   ema=-1,  ramp=0.05, map=2), # Populated dynamically based on resolution and GPU count.
         'stylegan2': dict(ref_gpus=8,  kimg=25000,  mb=32, mbstd=4,  fmaps=1,   lrate=0.002,  gamma=10,   ema=10,  ramp=None, map=8), # Uses mixed-precision, unlike the original StyleGAN2.
         'paper256':  dict(ref_gpus=8,  kimg=25000,  mb=64, mbstd=8,  fmaps=0.5, lrate=0.0025, gamma=1,    ema=20,  ramp=None, map=8),
@@ -172,6 +174,12 @@ def setup_training_loop_kwargs(
         spec.lrate = 0.002 if res >= 1024 else 0.0025
         spec.gamma = 0.0002 * (res ** 2) / spec.mb # heuristic formula
         spec.ema = spec.mb * 10 / 32
+
+    if spec.ref_gpus < 0:
+        spec.ref_gpus = gpus
+    
+    if spec.get('snap', None):
+        args.image_snapshot_ticks = args.network_snapshot_ticks = spec.snap
 
     args.G_kwargs = dnnlib.EasyDict(class_name='training.networks.Generator', z_dim=512, w_dim=512, mapping_kwargs=dnnlib.EasyDict(), synthesis_kwargs=dnnlib.EasyDict())
     args.D_kwargs = dnnlib.EasyDict(class_name='training.networks.Discriminator', block_kwargs=dnnlib.EasyDict(), mapping_kwargs=dnnlib.EasyDict(), epilogue_kwargs=dnnlib.EasyDict())
@@ -223,7 +231,14 @@ def setup_training_loop_kwargs(
     # Discriminator augmentation: aug, p, target, augpipe
     # ---------------------------------------------------
 
-    if aug is None:
+    if diffaugment is None:
+        diffaugment = 'color,translation,cutout'
+
+    if diffaugment:
+        args.loss_kwargs.diffaugment = diffaugment
+        aug = 'noaug'
+        desc += '-{}'.format(diffaugment.replace(',', '-'))
+    elif aug is None:
         aug = 'ada'
     else:
         assert isinstance(aug, str)
@@ -413,12 +428,13 @@ class CommaSeparatedList(click.ParamType):
 @click.option('--mirror', help='Enable dataset x-flips [default: false]', type=bool, metavar='BOOL')
 
 # Base config.
-@click.option('--cfg', help='Base config [default: auto]', type=click.Choice(['auto', 'stylegan2', 'paper256', 'paper512', 'paper1024', 'cifar']))
+@click.option('--cfg', help='Base config [default: low_shot]', type=click.Choice(['low_shot', 'auto', 'stylegan2', 'paper256', 'paper512', 'paper1024', 'cifar']))
 @click.option('--gamma', help='Override R1 gamma', type=float)
 @click.option('--kimg', help='Override training duration', type=int, metavar='INT')
 @click.option('--batch', help='Override batch size', type=int, metavar='INT')
 
 # Discriminator augmentation.
+@click.option('--DiffAugment', help='Comma-separated list of DiffAugment policy [default: color,translation,cutout]', type=str)
 @click.option('--aug', help='Augmentation mode [default: ada]', type=click.Choice(['noaug', 'ada', 'fixed']))
 @click.option('--p', help='Augmentation probability for --aug=fixed', type=float)
 @click.option('--target', help='ADA target value for --aug=ada', type=float)

@@ -157,7 +157,7 @@ class ImageFolderDataset(Dataset):
         resolution      = None, # Ensure specific resolution, None = highest available.
         **super_kwargs,         # Additional arguments for the Dataset base class.
     ):
-        self._path = path
+        self._path = dnnlib.util.open_url(path, return_filename=True)
         self._zipfile = None
 
         if os.path.isdir(self._path):
