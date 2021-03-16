@@ -9,14 +9,16 @@ The following command is an example of training StyleGAN2 with the default *Colo
 python train.py --outdir=training-runs --data=https://hanlab.mit.edu/projects/data-efficient-gans/datasets/100-shot-obama.zip --gpus=1
 ```
 
-<img src="../imgs/low-shot-interp.jpg" width="1000px"/>
-
 ## Pre-Trained Models
 
-The following command is an example of generation with our pre-trained 100-shot Obama model. It will automatically convert a TensorFlow model to the PyTorch version. See [here](https://hanlab.mit.edu/projects/data-efficient-gans/models/) for a list of our provided pre-trained models. You may also use `legacy.py` to manually convert our pre-trained StyleGAN2 models to the compatible PyTorch version.
+The following commands are an example of generating images with our pre-trained 100-shot Obama model. See [here](https://hanlab.mit.edu/projects/data-efficient-gans/models/) for a list of our provided pre-trained models. The code will automatically convert a TensorFlow StyleGAN2 model to the compatible PyTorch version; you may also use `legacy.py` to do this manually.
 ```bash
-python generate.py --outdir=out --seeds=0-3 --network=https://hanlab.mit.edu/projects/data-efficient-gans/models/DiffAugment-stylegan2-100-shot-obama.pkl
+python generate.py --outdir=out --seeds=1-16 --network=https://hanlab.mit.edu/projects/data-efficient-gans/models/DiffAugment-stylegan2-100-shot-obama.pkl
+
+python style_mixing.py --outdir=out --rows=1-3 --cols=5-12 --network=https://hanlab.mit.edu/projects/data-efficient-gans/models/DiffAugment-stylegan2-100-shot-obama.pkl
 ```
+
+<img src="../imgs/style-mixing-grid.jpg" width="1000px"/>
 
 ## Other Usages
 
