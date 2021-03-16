@@ -24,6 +24,6 @@ python style_mixing.py --outdir=out --rows=1-3 --cols=5-12 --network=https://han
 
 To train on larger datasets (e.g., CIFAR and FFHQ), please follow the guidelines in the [stylegan2-ada-pytorch](https://github.com/NVlabs/stylegan2-ada-pytorch) README to prepare the datasets.
 
-## Disclaimers
+## Disclaimer
 
 This PyTorch codebase will not fully reproduce our paper's results, as it uses a different set of hyperparameters and a different evaluation protocal. Please refer to our [TensorFlow repo](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) to fully reproduce the paper's results.
