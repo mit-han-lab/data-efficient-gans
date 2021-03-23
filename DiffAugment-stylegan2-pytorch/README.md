@@ -15,10 +15,10 @@ The following commands are an example of generating images with our pre-trained 
 ```bash
 python generate.py --outdir=out --seeds=1-16 --network=https://hanlab.mit.edu/projects/data-efficient-gans/models/DiffAugment-stylegan2-100-shot-obama.pkl
 
-python style_mixing.py --outdir=out --rows=1-3 --cols=5-12 --network=https://hanlab.mit.edu/projects/data-efficient-gans/models/DiffAugment-stylegan2-100-shot-obama.pkl
+python generate_gif.py --output=obama.gif --seed=0 --num-rows=1 --num-cols=8 --network=https://hanlab.mit.edu/projects/data-efficient-gans/models/DiffAugment-stylegan2-100-shot-obama.pkl
 ```
 
-<img src="../imgs/style-mixing-grid.jpg" width="1000px"/>
+<img src="../imgs/obama.gif" width="1000px"/>
 
 ## Other Usages
 
