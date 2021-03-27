@@ -50,7 +50,9 @@ def generate_gif(
     with dnnlib.util.open_url(network_pkl) as f:
         G = legacy.load_network_pkl(f)['G_ema'].to(device) # type: ignore
 
-    os.makedirs(os.path.dirname(output), exist_ok=True)
+    outdir = os.path.dirname(output)
+    if outdir:
+        os.makedirs(outdir, exist_ok=True)
 
     np.random.seed(seed)
 
