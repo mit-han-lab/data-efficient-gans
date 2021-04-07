@@ -68,18 +68,19 @@ def calc_metric(metric, **kwargs): # See metric_utils.MetricOptions for the full
 
 #----------------------------------------------------------------------------
 
-def report_metric(result_dict, run_dir=None, snapshot_pkl=None, comet_experiment=None):
+def report_metric(result_dict, run_dir=None, snapshot_pkl=None, comet_api_key='', comet_experiment_key=''):
     metric = result_dict['metric']
     assert is_valid_metric(metric)
     if run_dir is not None and snapshot_pkl is not None:
         snapshot_pkl = os.path.relpath(snapshot_pkl, run_dir)
 
-    if comet_experiment:
+    if comet_api_key:
         if comet_ml is None:
             pass
         else:
             try:
-                comet_experiment.log(result_dict['results'])
+                experiment = comet_ml.ExistingExperiment(api_key=comet_api_key, previous_experiment=comet_experiment_key)
+                experiment.log_metrics(result_dict['results'])
             except Exception:
                 print('Comet logging failed')
 
