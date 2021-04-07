@@ -9,6 +9,10 @@
 import os
 import time
 import json
+try:
+    import comet_ml
+except ImportError:
+    comet_ml = None
 import torch
 import dnnlib
 
@@ -71,11 +75,13 @@ def report_metric(result_dict, run_dir=None, snapshot_pkl=None, comet_experiment
         snapshot_pkl = os.path.relpath(snapshot_pkl, run_dir)
 
     if comet_experiment:
-        import comet_ml
-        try:
-            comet_experiment.log(result_dict['results'])
-        except Exception:
-            print('Comet logging failed')
+        if comet_ml is None:
+            pass
+        else:
+            try:
+                comet_experiment.log(result_dict['results'])
+            except Exception:
+                print('Comet logging failed')
 
     jsonl_line = json.dumps(dict(result_dict, snapshot_pkl=snapshot_pkl, timestamp=time.time()))
     print(jsonl_line)

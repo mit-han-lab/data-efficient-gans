@@ -14,6 +14,10 @@ import click
 import re
 import json
 import tempfile
+try:
+    import comet_ml
+except ImportError:
+    comet_ml = None
 import torch
 import dnnlib
 
@@ -98,25 +102,28 @@ def setup_training_loop_kwargs(
     if comet_api_key is None:
         comet_api_key = ''
     if comet_api_key:
-        import comet_ml
-        args.comet_experiment = comet_ml.Experiment(api_key=comet_api_key, project_name='Sirius SOTA GANs')
-        hyper_params = {
-            'gpus': gpus,
-            'snap': snap,
-            'metrics': metrics,
-            'seed': seed,
-            'data': data,
-            'mirror': mirror,
-            'cfg': cfg,
-            'gamma': gamma,
-            'kimg': kimg,
-            'batch': batch,
-            'diffaugment': diffaugment,
-            'aug': aug,
-            'p': p,
-            'target': target,
-            'augpipe': augpipe}
-        args.comet_experiment.log_parameters(hyper_params)
+        if comet_ml is None:
+            print('comet_ml is not imported! Proceeding without comet.ml logging')
+            args.comet_experiment = None
+        else:
+            args.comet_experiment = comet_ml.Experiment(api_key=comet_api_key, project_name='Sirius SOTA GANs')
+            hyper_params = {
+                'gpus': gpus,
+                'snap': snap,
+                'metrics': metrics,
+                'seed': seed,
+                'data': data,
+                'mirror': mirror,
+                'cfg': cfg,
+                'gamma': gamma,
+                'kimg': kimg,
+                'batch': batch,
+                'diffaugment': diffaugment,
+                'aug': aug,
+                'p': p,
+                'target': target,
+                'augpipe': augpipe}
+            args.comet_experiment.log_parameters(hyper_params)
     else:
         args.comet_experiment = None
 
