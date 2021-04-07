@@ -17,6 +17,7 @@ import tempfile
 try:
     import comet_ml
 except ImportError:
+    print('Failed to load comet_ml')
     comet_ml = None
 import torch
 import dnnlib
