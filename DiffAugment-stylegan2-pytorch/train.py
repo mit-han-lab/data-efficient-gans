@@ -444,7 +444,7 @@ class CommaSeparatedList(click.ParamType):
 @click.option('--gpus', help='Number of GPUs to use [default: 1]', type=int, metavar='INT')
 @click.option('--snap', help='Snapshot interval [default: 50 ticks]', type=int, metavar='INT')
 @click.option('--metrics', help='Comma-separated list or "none" [default: fid50k_full]', type=CommaSeparatedList())
-@click.option('--comet_api_key', help='Comet.ml API key (to log args and metrics)', type=str)
+@click.option('--comet-api-key', help='Comet.ml API key (to log args and metrics)', type=str)
 @click.option('--seed', help='Random seed [default: 0]', type=int, metavar='INT')
 @click.option('-n', '--dry-run', help='Print training options and exit', is_flag=True)
 
