@@ -110,7 +110,9 @@ def setup_training_loop_kwargs(
         else:
             args.comet_api_key = comet_api_key
             experiment = comet_ml.Experiment(api_key=comet_api_key, project_name='Sirius SOTA GANs',
-                                             auto_output_logging='simple')
+                                             auto_output_logging='simple', auto_log_co2=False,
+                                             auto_metric_logging=False, auto_param_logging=False,
+                                             auto_weight_logging=False)
             args.comet_experiment_key = experiment.get_key()
             # hyper_params = {
             #     'gpus': gpus,
@@ -588,7 +590,9 @@ def main(ctx, outdir, dry_run, **config_kwargs):
             try:
                 experiment = comet_ml.ExistingExperiment(api_key=args.comet_api_key,
                                                          previous_experiment=args.comet_experiment_key,
-                                                         auto_output_logging='simple')
+                                                         auto_output_logging='simple', auto_log_co2=False,
+                                                         auto_metric_logging=False, auto_param_logging=False,
+                                                         auto_weight_logging=False, display_summary_level=0)
                 experiment.log_parameters(config_kwargs)
             except Exception:
                 print('Comet logging failed')

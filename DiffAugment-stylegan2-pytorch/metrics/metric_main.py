@@ -81,7 +81,9 @@ def report_metric(result_dict, run_dir=None, snapshot_pkl=None, comet_api_key=''
             try:
                 experiment = comet_ml.ExistingExperiment(api_key=comet_api_key,
                                                          previous_experiment=comet_experiment_key,
-                                                         auto_output_logging='simple')
+                                                         auto_output_logging='simple', auto_log_co2=False,
+                                                         auto_metric_logging=False, auto_param_logging=False,
+                                                         auto_weight_logging=False, display_summary_level=0)
                 experiment.log_metrics(result_dict['results'])
             except Exception:
                 print('Comet logging failed')
