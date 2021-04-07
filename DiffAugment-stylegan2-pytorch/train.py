@@ -101,31 +101,7 @@ def setup_training_loop_kwargs(
 
     if comet_api_key is None:
         comet_api_key = ''
-    if comet_api_key:
-        if comet_ml is None:
-            print('comet_ml is not imported! Proceeding without comet.ml logging')
-            args.comet_experiment = None
-        else:
-            args.comet_experiment = comet_ml.Experiment(api_key=comet_api_key, project_name='Sirius SOTA GANs')
-            hyper_params = {
-                'gpus': gpus,
-                'snap': snap,
-                'metrics': metrics,
-                'seed': seed,
-                'data': data,
-                'mirror': mirror,
-                'cfg': cfg,
-                'gamma': gamma,
-                'kimg': kimg,
-                'batch': batch,
-                'diffaugment': diffaugment,
-                'aug': aug,
-                'p': p,
-                'target': target,
-                'augpipe': augpipe}
-            args.comet_experiment.log_parameters(hyper_params)
-    else:
-        args.comet_experiment = None
+    args.comet_api_key = comet_api_key
 
     if seed is None:
         seed = 0
@@ -408,7 +384,7 @@ def setup_training_loop_kwargs(
 
 #----------------------------------------------------------------------------
 
-def subprocess_fn(rank, args, temp_dir):
+def subprocess_fn(rank, args, temp_dir, comet_experiment=None):
     dnnlib.util.Logger(file_name=os.path.join(args.run_dir, 'log.txt'), file_mode='a', should_flush=True)
 
     # Init torch.distributed.
@@ -428,7 +404,7 @@ def subprocess_fn(rank, args, temp_dir):
         custom_ops.verbosity = 'none'
 
     # Execute training loop.
-    training_loop.training_loop(rank=rank, **args)
+    training_loop.training_loop(rank=rank, comet_experiment=comet_experiment, **args)
 
 #----------------------------------------------------------------------------
 
@@ -574,15 +550,44 @@ def main(ctx, outdir, dry_run, **config_kwargs):
     with open(os.path.join(args.run_dir, 'training_options.json'), 'wt') as f:
         json.dump(args, f, indent=2)
 
+    # Setup comet experiment
+    if args.comet_api_key:
+        if comet_ml is None:
+            print('comet_ml is not imported! Proceeding without comet.ml logging')
+            comet_experiment = None
+        else:
+            comet_experiment = comet_ml.Experiment(api_key=args.comet_api_key, project_name='Sirius SOTA GANs')
+            hyper_params = config_kwargs
+            # hyper_params = {
+            #     'gpus': gpus,
+            #     'snap': snap,
+            #     'metrics': metrics,
+            #     'seed': seed,
+            #     'data': data,
+            #     'mirror': mirror,
+            #     'cfg': cfg,
+            #     'gamma': gamma,
+            #     'kimg': kimg,
+            #     'batch': batch,
+            #     'diffaugment': diffaugment,
+            #     'aug': aug,
+            #     'p': p,
+            #     'target': target,
+            #     'augpipe': augpipe}
+            comet_experiment.log_parameters(hyper_params)
+
+    else:
+        comet_experiment = None
+
 
     # Launch processes.
     print('Launching processes...')
     torch.multiprocessing.set_start_method('spawn')
     with tempfile.TemporaryDirectory() as temp_dir:
         if args.num_gpus == 1:
-            subprocess_fn(rank=0, args=args, temp_dir=temp_dir)
+            subprocess_fn(rank=0, args=args, temp_dir=temp_dir, comet_experiment=comet_experiment)
         else:
-            torch.multiprocessing.spawn(fn=subprocess_fn, args=(args, temp_dir), nprocs=args.num_gpus)
+            torch.multiprocessing.spawn(fn=subprocess_fn, args=(args, temp_dir, comet_experiment), nprocs=args.num_gpus)
 
 #----------------------------------------------------------------------------
 
