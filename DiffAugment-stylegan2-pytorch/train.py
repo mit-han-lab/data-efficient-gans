@@ -538,6 +538,7 @@ def main(ctx, outdir, dry_run, **config_kwargs):
 
     # Setup training options.
     try:
+        print('Comet API ley is: ', config_kwargs['comet_api_key'])
         run_desc, args = setup_training_loop_kwargs(**config_kwargs)
     except UserError as err:
         ctx.fail(err)
