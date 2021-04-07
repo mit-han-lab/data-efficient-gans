@@ -109,8 +109,9 @@ def setup_training_loop_kwargs(
             args.comet_experiment_key = ''
         else:
             args.comet_api_key = comet_api_key
-            args.comet_experiment_key = comet_ml.Experiment(api_key=comet_api_key, project_name='Sirius SOTA GANs',
+            experiment = comet_ml.Experiment(api_key=comet_api_key, project_name='Sirius SOTA GANs',
                                                             auto_output_logging='simple')
+            args.comet_experiment_key = experiment.get_key()
             # hyper_params = {
             #     'gpus': gpus,
             #     'snap': snap,
