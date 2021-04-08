@@ -97,6 +97,8 @@ def training_loop(
     augment_kwargs          = None,     # Options for augmentation pipeline. None = disable.
     loss_kwargs             = {},       # Options for loss function.
     metrics                 = [],       # Metrics to evaluate during training.
+    comet_api_key           = '',       # comet_ml api key for comet.ml logging or '' to disable it
+    comet_experiment_key    = '',       # comet_ml experiment key for comet.ml logging or '' to disable it
     random_seed             = 0,        # Global random seed.
     num_gpus                = 1,        # Number of GPUs participating in the training.
     rank                    = 0,        # Rank of the current process in [0, num_gpus[.
@@ -384,7 +386,9 @@ def training_loop(
                 result_dict = metric_main.calc_metric(metric=metric, G=snapshot_data['G_ema'], D=snapshot_data['D'],
                     dataset_kwargs=training_set_kwargs, validation_dataset_kwargs=validation_set_kwargs, num_gpus=num_gpus, rank=rank, device=device)
                 if rank == 0:
-                    metric_main.report_metric(result_dict, run_dir=run_dir, snapshot_pkl=snapshot_pkl)
+                    metric_main.report_metric(result_dict, run_dir=run_dir, snapshot_pkl=snapshot_pkl,
+                                              comet_api_key=comet_api_key, comet_experiment_key=comet_experiment_key,
+                                              cur_nimg=cur_nimg)
                 stats_metrics.update(result_dict.results)
         del snapshot_data # conserve memory
 

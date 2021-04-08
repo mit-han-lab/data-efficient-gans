@@ -14,6 +14,11 @@ import click
 import re
 import json
 import tempfile
+try:
+    import comet_ml
+except ImportError:
+    print('Failed to load comet_ml')
+    comet_ml = None
 import torch
 import dnnlib
 
@@ -31,43 +36,45 @@ class UserError(Exception):
 
 def setup_training_loop_kwargs(
     # General options (not included in desc).
-    gpus       = None, # Number of GPUs: <int>, default = 1 gpu
-    snap       = None, # Snapshot interval: <int>, default = 50 ticks
-    metrics    = None, # List of metric names: [], ['fid50k_full'] (default), ...
-    seed       = None, # Random seed: <int>, default = 0
+    gpus                    = None, # Number of GPUs: <int>, default = 1 gpu
+    snap                    = None, # Snapshot interval: <int>, default = 50 ticks
+    metrics                 = None, # List of metric names: [], ['fid50k_full'] (default), ...
+    comet_api_key           = None, # API key for Comet.ml: <str>, default = '' (don't use comet)
+    seed                    = None, # Random seed: <int>, default = 0
 
-    # Train Dataset.
-    data       = None, # Training dataset (required): <path>
-    cond       = None, # Train conditional model based on dataset labels: <bool>, default = False
-    subset     = None, # Train with only N images: <int>, default = all
-    mirror     = None, # Augment dataset with x-flips: <bool>, default = False
+    # Train ataset.
+    data                    = None, # Training dataset (required): <path>
+    cond                    = None, # Train conditional model based on dataset labels: <bool>, default = False
+    subset                  = None, # Train with only N images: <int>, default = all
+    mirror                  = None, # Augment dataset with x-flips: <bool>, default = False
 
     # ValidationDataset.
     testdata       = None, # Validation dataset (optional): <path>
 
     # Base config.
-    cfg        = None, # Base config: 'auto' (default), 'stylegan2', 'paper256', 'paper512', 'paper1024', 'cifar'
-    gamma      = None, # Override R1 gamma: <float>
-    kimg       = None, # Override training duration: <int>
-    batch      = None, # Override batch size: <int>
+    cfg                     = None, # Base config: 'auto' (default), 'stylegan2', 'paper256', 'paper512', 'paper1024', 'cifar'
+    gamma                   = None, # Override R1 gamma: <float>
+    kimg                    = None, # Override training duration: <int>
+    batch                   = None, # Override batch size: <int>
 
     # Discriminator augmentation.
-    diffaugment= None, # Comma-separated list of DiffAugment policy, default = 'color,translation,cutout'
-    aug        = None, # Augmentation mode: 'ada' (default), 'noaug', 'fixed'
-    p          = None, # Specify p for 'fixed' (required): <float>
-    target     = None, # Override ADA target for 'ada': <float>, default = depends on aug
-    augpipe    = None, # Augmentation pipeline: 'blit', 'geom', 'color', 'filter', 'noise', 'cutout', 'bg', 'bgc' (default), ..., 'bgcfnc'
+    diffaugment             = None, # Comma-separated list of DiffAugment policy, default = 'color,translation,cutout'
+    diffaugment_placement   = None, # Comma-separated list of DiffAugment applying placement, default = 'real,generated,backprop'
+    aug                     = None, # Augmentation mode: 'ada' (default), 'noaug', 'fixed'
+    p                       = None, # Specify p for 'fixed' (required): <float>
+    target                  = None, # Override ADA target for 'ada': <float>, default = depends on aug
+    augpipe                 = None, # Augmentation pipeline: 'blit', 'geom', 'color', 'filter', 'noise', 'cutout', 'bg', 'bgc' (default), ..., 'bgcfnc'
 
     # Transfer learning.
-    resume     = None, # Load previous network: 'noresume' (default), 'ffhq256', 'ffhq512', 'ffhq1024', 'celebahq256', 'lsundog256', <file>, <url>
-    freezed    = None, # Freeze-D: <int>, default = 0 discriminator layers
+    resume                  = None, # Load previous network: 'noresume' (default), 'ffhq256', 'ffhq512', 'ffhq1024', 'celebahq256', 'lsundog256', <file>, <url>
+    freezed                 = None, # Freeze-D: <int>, default = 0 discriminator layers
 
     # Performance options (not included in desc).
-    fp32       = None, # Disable mixed-precision training: <bool>, default = False
-    nhwc       = None, # Use NHWC memory format with FP16: <bool>, default = False
-    allow_tf32 = None, # Allow PyTorch to use TF32 for matmul and convolutions: <bool>, default = False
-    nobench    = None, # Disable cuDNN benchmarking: <bool>, default = False
-    workers    = None, # Override number of DataLoader workers: <int>, default = 3
+    fp32                    = None, # Disable mixed-precision training: <bool>, default = False
+    nhwc                    = None, # Use NHWC memory format with FP16: <bool>, default = False
+    allow_tf32              = None, # Allow PyTorch to use TF32 for matmul and convolutions: <bool>, default = False
+    nobench                 = None, # Disable cuDNN benchmarking: <bool>, default = False
+    workers                 = None, # Override number of DataLoader workers: <int>, default = 3
 ):
     args = dnnlib.EasyDict()
 
@@ -96,6 +103,24 @@ def setup_training_loop_kwargs(
     if not all(metric_main.is_valid_metric(metric) for metric in metrics):
         raise UserError('\n'.join(['--metrics can only contain the following values:'] + metric_main.list_valid_metrics()))
     args.metrics = metrics
+
+    if comet_api_key is None:
+        comet_api_key = ''
+    if comet_api_key:
+        if comet_ml is None:
+            print('comet_ml is not imported! Proceeding without comet.ml logging')
+            args.comet_api_key = ''
+            args.comet_experiment_key = ''
+        else:
+            args.comet_api_key = comet_api_key
+            experiment = comet_ml.Experiment(api_key=comet_api_key, project_name='Sirius SOTA GANs',
+                                             auto_output_logging='simple', auto_log_co2=False,
+                                             auto_metric_logging=False, auto_param_logging=False,
+                                             auto_weight_logging=False)
+            args.comet_experiment_key = experiment.get_key()
+    else:
+        args.comet_api_key = ''
+        args.comet_experiment_key = ''
 
     if seed is None:
         seed = 0
@@ -189,7 +214,7 @@ def setup_training_loop_kwargs(
 
     if spec.ref_gpus < 0:
         spec.ref_gpus = gpus
-    
+
     if spec.get('snap', None):
         args.image_snapshot_ticks = args.network_snapshot_ticks = spec.snap
 
@@ -255,6 +280,13 @@ def setup_training_loop_kwargs(
     else:
         assert isinstance(aug, str)
         desc += f'-{aug}'
+
+
+    if diffaugment_placement is None and diffaugment is not None:
+        diffaugment_placement = 'real,generated,backprop'
+
+    if diffaugment_placement:
+        args.loss_kwargs.diffaugment_placement = diffaugment_placement
 
     if aug == 'ada':
         args.ada_target = 0.6
@@ -430,6 +462,7 @@ class CommaSeparatedList(click.ParamType):
 @click.option('--gpus', help='Number of GPUs to use [default: 1]', type=int, metavar='INT')
 @click.option('--snap', help='Snapshot interval [default: 50 ticks]', type=int, metavar='INT')
 @click.option('--metrics', help='Comma-separated list or "none" [default: fid50k_full]', type=CommaSeparatedList())
+@click.option('--comet-api-key', help='Comet.ml API key (to log args and metrics)', type=str)
 @click.option('--seed', help='Random seed [default: 0]', type=int, metavar='INT')
 @click.option('-n', '--dry-run', help='Print training options and exit', is_flag=True)
 
@@ -448,6 +481,7 @@ class CommaSeparatedList(click.ParamType):
 
 # Discriminator augmentation.
 @click.option('--DiffAugment', help='Comma-separated list of DiffAugment policy [default: color,translation,cutout]', type=str)
+@click.option('--diffaugment_placement', help='Comma-separated list of DiffAugment applying placement [default: real,generated,backprop]', type=str)
 @click.option('--aug', help='Augmentation mode [default: ada]', type=click.Choice(['noaug', 'ada', 'fixed']))
 @click.option('--p', help='Augmentation probability for --aug=fixed', type=float)
 @click.option('--target', help='ADA target value for --aug=ada', type=float)
@@ -532,6 +566,7 @@ def main(ctx, outdir, dry_run, **config_kwargs):
     print(json.dumps(args, indent=2))
     print()
     print(f'Output directory:            {args.run_dir}')
+    print(f'Use Comet:                   {bool(args.comet_api_key)}')
     print(f'Training data:               {args.training_set_kwargs.path}')
     print(f'Validation data:             {args.validation_set_kwargs.path}')
     print(f'Training duration:           {args.total_kimg} kimg')
@@ -553,6 +588,21 @@ def main(ctx, outdir, dry_run, **config_kwargs):
     os.makedirs(args.run_dir)
     with open(os.path.join(args.run_dir, 'training_options.json'), 'wt') as f:
         json.dump(args, f, indent=2)
+
+    # Setup comet experiment hyperparameters
+    if args.comet_api_key:
+        if comet_ml is not None:
+            try:
+                experiment = comet_ml.ExistingExperiment(api_key=args.comet_api_key,
+                                                         previous_experiment=args.comet_experiment_key,
+                                                         auto_output_logging=False, auto_log_co2=False,
+                                                         auto_metric_logging=False, auto_param_logging=False,
+                                                         display_summary_level=0)
+                experiment.log_parameters(config_kwargs)
+            except Exception:
+                print('Comet logging failed')
+
+
 
     # Launch processes.
     print('Launching processes...')
