@@ -9,6 +9,10 @@
 import os
 import time
 import json
+try:
+    import comet_ml
+except ImportError:
+    comet_ml = None
 import torch
 import dnnlib
 
@@ -64,11 +68,23 @@ def calc_metric(metric, **kwargs): # See metric_utils.MetricOptions for the full
 
 #----------------------------------------------------------------------------
 
-def report_metric(result_dict, run_dir=None, snapshot_pkl=None):
+def report_metric(result_dict, run_dir=None, snapshot_pkl=None, comet_api_key='', comet_experiment_key='', cur_nimg=-1):
     metric = result_dict['metric']
     assert is_valid_metric(metric)
     if run_dir is not None and snapshot_pkl is not None:
         snapshot_pkl = os.path.relpath(snapshot_pkl, run_dir)
+
+    if comet_api_key:
+        if comet_ml is not None:
+            try:
+                experiment = comet_ml.ExistingExperiment(api_key=comet_api_key,
+                                                         previous_experiment=comet_experiment_key,
+                                                         auto_output_logging=False, auto_log_co2=False,
+                                                         auto_metric_logging=False, auto_param_logging=False,
+                                                         display_summary_level=0)
+                experiment.log_metrics(result_dict['results'], step=cur_nimg)
+            except Exception:
+                print('Comet logging failed')
 
     jsonl_line = json.dumps(dict(result_dict, snapshot_pkl=snapshot_pkl, timestamp=time.time()))
     print(jsonl_line)

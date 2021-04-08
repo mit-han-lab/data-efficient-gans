@@ -14,6 +14,11 @@ import click
 import re
 import json
 import tempfile
+try:
+    import comet_ml
+except ImportError:
+    print('Failed to load comet_ml')
+    comet_ml = None
 import torch
 import dnnlib
 
@@ -34,6 +39,7 @@ def setup_training_loop_kwargs(
     gpus       = None, # Number of GPUs: <int>, default = 1 gpu
     snap       = None, # Snapshot interval: <int>, default = 50 ticks
     metrics    = None, # List of metric names: [], ['fid50k_full'] (default), ...
+    comet_api_key= None, # API key for Comet.ml: <str>, default = '' (don't use comet)
     seed       = None, # Random seed: <int>, default = 0
 
     # Dataset.
@@ -93,6 +99,24 @@ def setup_training_loop_kwargs(
     if not all(metric_main.is_valid_metric(metric) for metric in metrics):
         raise UserError('\n'.join(['--metrics can only contain the following values:'] + metric_main.list_valid_metrics()))
     args.metrics = metrics
+
+    if comet_api_key is None:
+        comet_api_key = ''
+    if comet_api_key:
+        if comet_ml is None:
+            print('comet_ml is not imported! Proceeding without comet.ml logging')
+            args.comet_api_key = ''
+            args.comet_experiment_key = ''
+        else:
+            args.comet_api_key = comet_api_key
+            experiment = comet_ml.Experiment(api_key=comet_api_key, project_name='Sirius SOTA GANs',
+                                             auto_output_logging='simple', auto_log_co2=False,
+                                             auto_metric_logging=False, auto_param_logging=False,
+                                             auto_weight_logging=False)
+            args.comet_experiment_key = experiment.get_key()
+    else:
+        args.comet_api_key = ''
+        args.comet_experiment_key = ''
 
     if seed is None:
         seed = 0
@@ -418,6 +442,7 @@ class CommaSeparatedList(click.ParamType):
 @click.option('--gpus', help='Number of GPUs to use [default: 1]', type=int, metavar='INT')
 @click.option('--snap', help='Snapshot interval [default: 50 ticks]', type=int, metavar='INT')
 @click.option('--metrics', help='Comma-separated list or "none" [default: fid50k_full]', type=CommaSeparatedList())
+@click.option('--comet-api-key', help='Comet.ml API key (to log args and metrics)', type=str)
 @click.option('--seed', help='Random seed [default: 0]', type=int, metavar='INT')
 @click.option('-n', '--dry-run', help='Print training options and exit', is_flag=True)
 
@@ -519,6 +544,7 @@ def main(ctx, outdir, dry_run, **config_kwargs):
     print(json.dumps(args, indent=2))
     print()
     print(f'Output directory:   {args.run_dir}')
+    print(f'Use Comet:          {bool(args.comet_api_key)}')
     print(f'Training data:      {args.training_set_kwargs.path}')
     print(f'Training duration:  {args.total_kimg} kimg')
     print(f'Number of GPUs:     {args.num_gpus}')
@@ -538,6 +564,21 @@ def main(ctx, outdir, dry_run, **config_kwargs):
     os.makedirs(args.run_dir)
     with open(os.path.join(args.run_dir, 'training_options.json'), 'wt') as f:
         json.dump(args, f, indent=2)
+
+    # Setup comet experiment hyperparameters
+    if args.comet_api_key:
+        if comet_ml is not None:
+            try:
+                experiment = comet_ml.ExistingExperiment(api_key=args.comet_api_key,
+                                                         previous_experiment=args.comet_experiment_key,
+                                                         auto_output_logging=False, auto_log_co2=False,
+                                                         auto_metric_logging=False, auto_param_logging=False,
+                                                         display_summary_level=0)
+                experiment.log_parameters(config_kwargs)
+            except Exception:
+                print('Comet logging failed')
+
+
 
     # Launch processes.
     print('Launching processes...')
