@@ -114,23 +114,23 @@ def setup_training_loop_kwargs(
                                              auto_metric_logging=False, auto_param_logging=False,
                                              auto_weight_logging=False)
             args.comet_experiment_key = experiment.get_key()
-            # hyper_params = {
-            #     'gpus': gpus,
-            #     'snap': snap,
-            #     'metrics': metrics,
-            #     'seed': seed,
-            #     'data': data,
-            #     'mirror': mirror,
-            #     'cfg': cfg,
-            #     'gamma': gamma,
-            #     'kimg': kimg,
-            #     'batch': batch,
-            #     'diffaugment': diffaugment,
-            #     'aug': aug,
-            #     'p': p,
-            #     'target': target,
-            #     'augpipe': augpipe}
-            # args.comet_experiment.log_parameters(hyper_params)
+            hyper_params = {
+                'gpus': gpus,
+                'snap': snap,
+                'metrics': metrics,
+                'seed': seed,
+                'data': data,
+                'mirror': mirror,
+                'cfg': cfg,
+                'gamma': gamma,
+                'kimg': kimg,
+                'batch': batch,
+                'diffaugment': diffaugment,
+                'aug': aug,
+                'p': p,
+                'target': target,
+                'augpipe': augpipe}
+            args.comet_experiment.log_parameters(hyper_params)
     else:
         args.comet_api_key = ''
         args.comet_experiment_key = ''
