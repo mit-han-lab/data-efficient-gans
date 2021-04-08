@@ -584,9 +584,7 @@ def main(ctx, outdir, dry_run, **config_kwargs):
 
     # Setup comet experiment hyperparameters
     if args.comet_api_key:
-        if comet_ml is None:
-            pass
-        else:
+        if not comet_ml is None:
             try:
                 experiment = comet_ml.ExistingExperiment(api_key=args.comet_api_key,
                                                          previous_experiment=args.comet_experiment_key,
