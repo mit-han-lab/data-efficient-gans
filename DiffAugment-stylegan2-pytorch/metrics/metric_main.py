@@ -75,9 +75,7 @@ def report_metric(result_dict, run_dir=None, snapshot_pkl=None, comet_api_key=''
         snapshot_pkl = os.path.relpath(snapshot_pkl, run_dir)
 
     if comet_api_key:
-        if comet_ml is None:
-            pass
-        else:
+        if not comet_ml is None:
             try:
                 experiment = comet_ml.ExistingExperiment(api_key=comet_api_key,
                                                          previous_experiment=comet_experiment_key,
