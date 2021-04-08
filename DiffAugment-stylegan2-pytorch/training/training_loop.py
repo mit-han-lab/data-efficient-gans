@@ -377,7 +377,8 @@ def training_loop(
                     dataset_kwargs=training_set_kwargs, num_gpus=num_gpus, rank=rank, device=device)
                 if rank == 0:
                     metric_main.report_metric(result_dict, run_dir=run_dir, snapshot_pkl=snapshot_pkl,
-                                              comet_api_key=comet_api_key, comet_experiment_key=comet_experiment_key)
+                                              comet_api_key=comet_api_key, comet_experiment_key=comet_experiment_key,
+                                              cur_nimg=cur_nimg)
                 stats_metrics.update(result_dict.results)
         del snapshot_data # conserve memory
 
