@@ -164,6 +164,35 @@ def open_cifar10(tarball: str, *, max_images: Optional[int]):
 
     return max_idx, iterate_images()
 
+def open_test_cifar10(tarball: str, *, max_images: Optional[int]):
+    images = []
+    labels = []
+
+    with tarfile.open(tarball, 'r:gz') as tar:
+        member = tar.getmember(f'cifar-10-batches-py/test_batch')
+        with tar.extractfile(member) as file:
+            data = pickle.load(file, encoding='latin1')
+        images.append(data['data'].reshape(-1, 3, 32, 32))
+        labels.append(data['labels'])
+
+    images = np.concatenate(images)
+    labels = np.concatenate(labels)
+    images = images.transpose([0, 2, 3, 1]) # NCHW -> NHWC
+    assert images.shape == (10000, 32, 32, 3) and images.dtype == np.uint8
+    assert labels.shape == (10000,) and labels.dtype in [np.int32, np.int64]
+    assert np.min(images) == 0 and np.max(images) == 255
+    assert np.min(labels) == 0 and np.max(labels) == 9
+
+    max_idx = maybe_min(len(images), max_images)
+
+    def iterate_images():
+        for idx, img in enumerate(images):
+            yield dict(img=img, label=int(labels[idx]))
+            if idx >= max_idx-1:
+                break
+
+    return max_idx, iterate_images()
+
 #----------------------------------------------------------------------------
 
 def open_mnist(images_gz: str, *, max_images: Optional[int]):
@@ -249,7 +278,7 @@ def make_transform(
 
 #----------------------------------------------------------------------------
 
-def open_dataset(source, *, max_images: Optional[int]):
+def open_dataset(source, *, test=False, max_images: Optional[int]):
     if os.path.isdir(source):
         if source.rstrip('/').endswith('_lmdb'):
             return open_lmdb(source, max_images=max_images)
@@ -257,7 +286,10 @@ def open_dataset(source, *, max_images: Optional[int]):
             return open_image_folder(source, max_images=max_images)
     elif os.path.isfile(source):
         if os.path.basename(source) == 'cifar-10-python.tar.gz':
-            return open_cifar10(source, max_images=max_images)
+            if not test:
+                return open_cifar10(source, max_images=max_images)
+            else:
+                return open_test_cifar10(source, max_images=max_images)
         elif os.path.basename(source) == 'train-images-idx3-ubyte.gz':
             return open_mnist(source, max_images=max_images)
         elif file_ext(source) == 'zip':
@@ -310,6 +342,7 @@ def open_dest(dest: str) -> Tuple[str, Callable[[str, Union[bytes, str]], None],
 @click.option('--transform', help='Input crop/resize mode', type=click.Choice(['center-crop', 'center-crop-wide']))
 @click.option('--width', help='Output width', type=int)
 @click.option('--height', help='Output height', type=int)
+@click.option('--test', help='Whether we want a test part of a dataset or train', type=bool)
 def convert_dataset(
     ctx: click.Context,
     source: str,
@@ -318,7 +351,8 @@ def convert_dataset(
     transform: Optional[str],
     resize_filter: str,
     width: Optional[int],
-    height: Optional[int]
+    height: Optional[int],
+    test: Optional[bool]
 ):
     """Convert an image dataset into a dataset archive usable with StyleGAN2 ADA PyTorch.
 
@@ -384,7 +418,7 @@ def convert_dataset(
     if dest == '':
         ctx.fail('--dest output filename or directory must not be an empty string')
 
-    num_files, input_iter = open_dataset(source, max_images=max_images)
+    num_files, input_iter = open_dataset(source, test=test, max_images=max_images)
     archive_root_dir, save_bytes, close_dest = open_dest(dest)
 
     transform_image = make_transform(transform, width, height, resize_filter)

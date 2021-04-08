@@ -17,6 +17,7 @@ import torch
 import dnnlib
 
 from . import metric_utils
+from . import accuracy
 from . import frechet_inception_distance
 from . import kernel_inception_distance
 from . import precision_recall
@@ -112,6 +113,12 @@ def pr50k3_full(opts):
     opts.dataset_kwargs.update(max_size=None, xflip=False)
     precision, recall = precision_recall.compute_pr(opts, max_real=200000, num_gen=50000, nhood_size=3, row_batch_size=10000, col_batch_size=10000)
     return dict(pr50k3_full_precision=precision, pr50k3_full_recall=recall)
+
+@register_metric
+def accuracy_full(opts):
+    opts.dataset_kwargs.update(max_size=None, xflip=False)
+    accuracy_train, accuracy_val = accuracy.compute_accuracy(opts, batch_size=32)
+    return dict(accuracy_full_train=accuracy_train, accuracy_full_val=accuracy_val)
 
 @register_metric
 def ppl2_wend(opts):
