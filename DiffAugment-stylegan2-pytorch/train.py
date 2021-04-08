@@ -31,41 +31,41 @@ class UserError(Exception):
 
 def setup_training_loop_kwargs(
     # General options (not included in desc).
-    gpus                = None, # Number of GPUs: <int>, default = 1 gpu
-    snap                = None, # Snapshot interval: <int>, default = 50 ticks
-    metrics             = None, # List of metric names: [], ['fid50k_full'] (default), ...
-    seed                = None, # Random seed: <int>, default = 0
+    gpus                    = None, # Number of GPUs: <int>, default = 1 gpu
+    snap                    = None, # Snapshot interval: <int>, default = 50 ticks
+    metrics                 = None, # List of metric names: [], ['fid50k_full'] (default), ...
+    seed                    = None, # Random seed: <int>, default = 0
 
     # Dataset.
-    data                = None, # Training dataset (required): <path>
-    cond                = None, # Train conditional model based on dataset labels: <bool>, default = False
-    subset              = None, # Train with only N images: <int>, default = all
-    mirror              = None, # Augment dataset with x-flips: <bool>, default = False
+    data                    = None, # Training dataset (required): <path>
+    cond                    = None, # Train conditional model based on dataset labels: <bool>, default = False
+    subset                  = None, # Train with only N images: <int>, default = all
+    mirror                  = None, # Augment dataset with x-flips: <bool>, default = False
 
     # Base config.
-    cfg                 = None, # Base config: 'auto' (default), 'stylegan2', 'paper256', 'paper512', 'paper1024', 'cifar'
-    gamma               = None, # Override R1 gamma: <float>
-    kimg                = None, # Override training duration: <int>
-    batch               = None, # Override batch size: <int>
+    cfg                     = None, # Base config: 'auto' (default), 'stylegan2', 'paper256', 'paper512', 'paper1024', 'cifar'
+    gamma                   = None, # Override R1 gamma: <float>
+    kimg                    = None, # Override training duration: <int>
+    batch                   = None, # Override batch size: <int>
 
     # Discriminator augmentation.
-    diffaugment         = None, # Comma-separated list of DiffAugment policy, default = 'color,translation,cutout'
+    diffaugment             = None, # Comma-separated list of DiffAugment policy, default = 'color,translation,cutout'
     diffaugment_placement   = None, # Comma-separated list of DiffAugment applying placement, default = 'real,generated,backprop'
-    aug                 = None, # Augmentation mode: 'ada' (default), 'noaug', 'fixed'
-    p                   = None, # Specify p for 'fixed' (required): <float>
-    target              = None, # Override ADA target for 'ada': <float>, default = depends on aug
-    augpipe             = None, # Augmentation pipeline: 'blit', 'geom', 'color', 'filter', 'noise', 'cutout', 'bg', 'bgc' (default), ..., 'bgcfnc'
+    aug                     = None, # Augmentation mode: 'ada' (default), 'noaug', 'fixed'
+    p                       = None, # Specify p for 'fixed' (required): <float>
+    target                  = None, # Override ADA target for 'ada': <float>, default = depends on aug
+    augpipe                 = None, # Augmentation pipeline: 'blit', 'geom', 'color', 'filter', 'noise', 'cutout', 'bg', 'bgc' (default), ..., 'bgcfnc'
 
     # Transfer learning.
-    resume              = None, # Load previous network: 'noresume' (default), 'ffhq256', 'ffhq512', 'ffhq1024', 'celebahq256', 'lsundog256', <file>, <url>
-    freezed             = None, # Freeze-D: <int>, default = 0 discriminator layers
+    resume                  = None, # Load previous network: 'noresume' (default), 'ffhq256', 'ffhq512', 'ffhq1024', 'celebahq256', 'lsundog256', <file>, <url>
+    freezed                 = None, # Freeze-D: <int>, default = 0 discriminator layers
 
     # Performance options (not included in desc).
-    fp32                = None, # Disable mixed-precision training: <bool>, default = False
-    nhwc                = None, # Use NHWC memory format with FP16: <bool>, default = False
-    allow_tf32          = None, # Allow PyTorch to use TF32 for matmul and convolutions: <bool>, default = False
-    nobench             = None, # Disable cuDNN benchmarking: <bool>, default = False
-    workers             = None, # Override number of DataLoader workers: <int>, default = 3
+    fp32                    = None, # Disable mixed-precision training: <bool>, default = False
+    nhwc                    = None, # Use NHWC memory format with FP16: <bool>, default = False
+    allow_tf32              = None, # Allow PyTorch to use TF32 for matmul and convolutions: <bool>, default = False
+    nobench                 = None, # Disable cuDNN benchmarking: <bool>, default = False
+    workers                 = None, # Override number of DataLoader workers: <int>, default = 3
 ):
     args = dnnlib.EasyDict()
 
