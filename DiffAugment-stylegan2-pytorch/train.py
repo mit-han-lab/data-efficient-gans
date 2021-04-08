@@ -270,7 +270,7 @@ def setup_training_loop_kwargs(
         desc += f'-{aug}'
 
 
-    if diffaugment_placement is None and not diffaugment is None:
+    if diffaugment_placement is None and diffaugment is not None:
         diffaugment_placement = 'real,generated,backprop'
 
     if diffaugment_placement:
