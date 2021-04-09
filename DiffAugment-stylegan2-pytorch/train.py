@@ -571,7 +571,7 @@ def main(ctx, outdir, dry_run, **config_kwargs):
     print(json.dumps(args, indent=2))
     print()
     print(f'Output directory:            {args.run_dir}')
-    print(f'Comet experiment name:       {args.comet_name if args.comet_api_key else "COMET IS DISABLED"}')
+    print(f'Use comet:                   {bool(args.comet_api_key)}')
     print(f'Training data:               {args.training_set_kwargs.path}')
     print(f'Validation data:             {args.validation_set_kwargs.path}')
     print(f'Training duration:           {args.total_kimg} kimg')
