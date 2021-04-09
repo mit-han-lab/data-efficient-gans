@@ -14,6 +14,10 @@ import pickle
 import psutil
 import PIL.Image
 import numpy as np
+try:
+    import comet_ml
+except ImportError:
+    comet_ml = None
 import torch
 import dnnlib
 from torch_utils import misc
@@ -416,6 +420,21 @@ def training_loop(
         maintenance_time = tick_start_time - tick_end_time
         if done:
             break
+
+        # Log to Comet.ml
+        if comet_api_key:
+            if comet_ml is not None:
+                try:
+                    experiment = comet_ml.ExistingExperiment(api_key=comet_api_key,
+                                                             previous_experiment=comet_experiment_key,
+                                                             auto_output_logging=False, auto_log_co2=False,
+                                                             auto_metric_logging=False, auto_param_logging=False,
+                                                             display_summary_level=0)
+                    experiment.log_image(image_data=os.path.join(run_dir, f'fakes{cur_nimg//1000:06d}.png'),
+                                         name=f'fakes{cur_nimg//1000:06d}', step=cur_nimg)
+                    experiment.log_text(text=' '.join(fields), step=cur_nimg)
+                except Exception:
+                    print('Comet logging failed')
 
     # Done.
     if rank == 0:
