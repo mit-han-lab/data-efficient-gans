@@ -422,7 +422,7 @@ def training_loop(
             break
 
         # Log to Comet.ml
-        if comet_api_key:
+        if rank == 0 and comet_api_key:
             if comet_ml is not None:
                 try:
                     experiment = comet_ml.ExistingExperiment(api_key=comet_api_key,
