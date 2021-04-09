@@ -440,8 +440,9 @@ def training_loop(
                                                          auto_output_logging=False, auto_log_co2=False,
                                                          auto_metric_logging=False, auto_param_logging=False,
                                                          display_summary_level=0)
-                experiment.log_image(image_data=os.path.join(run_dir, f'fakes{cur_nimg//1000:06d}.png'),
-                                     name=f'fakes{cur_nimg//1000:06d}', step=cur_nimg)
+                if (image_snapshot_ticks is not None) and (done or cur_tick % image_snapshot_ticks == 0):
+                    experiment.log_image(image_data=os.path.join(run_dir, f'fakes{cur_nimg//1000:06d}.png'),
+                                         name=f'fakes{cur_nimg//1000:06d}', step=cur_nimg)
                 experiment.log_text(text=' '.join(fields_for_comet), step=cur_nimg)
             except Exception:
                 print('Comet logging failed')
