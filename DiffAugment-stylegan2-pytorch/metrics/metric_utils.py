@@ -19,16 +19,18 @@ import dnnlib
 #----------------------------------------------------------------------------
 
 class MetricOptions:
-    def __init__(self, G=None, G_kwargs={}, dataset_kwargs={}, num_gpus=1, rank=0, device=None, progress=None, cache=True):
+    def __init__(self, G=None, G_kwargs={}, dataset_kwargs={}, num_gpus=1, rank=0, device=None, progress=None, cache=True, D=None, validation_dataset_kwargs={}):
         assert 0 <= rank < num_gpus
-        self.G              = G
-        self.G_kwargs       = dnnlib.EasyDict(G_kwargs)
-        self.dataset_kwargs = dnnlib.EasyDict(dataset_kwargs)
-        self.num_gpus       = num_gpus
-        self.rank           = rank
-        self.device         = device if device is not None else torch.device('cuda', rank)
-        self.progress       = progress.sub() if progress is not None and rank == 0 else ProgressMonitor()
-        self.cache          = cache
+        self.G                         = G
+        self.D                         = D
+        self.G_kwargs                  = dnnlib.EasyDict(G_kwargs)
+        self.dataset_kwargs            = dnnlib.EasyDict(dataset_kwargs)
+        self.validation_dataset_kwargs = dnnlib.EasyDict(validation_dataset_kwargs)
+        self.num_gpus                  = num_gpus
+        self.rank                      = rank
+        self.device                    = device if device is not None else torch.device('cuda', rank)
+        self.progress                  = progress.sub() if progress is not None and rank == 0 else ProgressMonitor()
+        self.cache                     = cache
 
 #----------------------------------------------------------------------------
 
