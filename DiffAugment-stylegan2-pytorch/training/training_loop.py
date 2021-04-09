@@ -352,6 +352,7 @@ def training_loop(
         training_stats.report0('Timing/total_days', (tick_end_time - start_time) / (24 * 60 * 60))
         if rank == 0:
             print(' '.join(fields))
+            fields_for_comet = fields
 
         # Check for abort.
         if (not done) and (abort_fn is not None) and abort_fn():
@@ -442,7 +443,7 @@ def training_loop(
                                                              display_summary_level=0)
                     experiment.log_image(image_data=os.path.join(run_dir, f'fakes{cur_nimg//1000:06d}.png'),
                                          name=f'fakes{cur_nimg//1000:06d}', step=cur_nimg)
-                    experiment.log_text(text=' '.join(fields), step=cur_nimg)
+                    experiment.log_text(text=' '.join(fields_for_comet), step=cur_nimg)
                 except Exception:
                     print('Comet logging failed')
 
