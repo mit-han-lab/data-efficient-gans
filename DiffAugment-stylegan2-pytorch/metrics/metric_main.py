@@ -118,7 +118,9 @@ def pr50k3_full(opts):
 def accuracy_full(opts):
     opts.dataset_kwargs.update(max_size=None, xflip=False)
     accuracy_train, accuracy_val = accuracy.compute_accuracy(opts, batch_size=32)
-    return dict(accuracy_full_train=accuracy_train, accuracy_full_val=accuracy_val)
+    if accuracy_val is not None:
+        return dict(accuracy_full_train=accuracy_train, accuracy_full_val=accuracy_val)
+    return dict(accuracy_full_train=accuracy_train)
 
 @register_metric
 def ppl2_wend(opts):

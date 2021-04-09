@@ -134,7 +134,6 @@ def setup_training_loop_kwargs(
     assert data is not None
     assert isinstance(data, str)
     args.training_set_kwargs = dnnlib.EasyDict(class_name='training.dataset.ImageFolderDataset', path=data, use_labels=True, max_size=None, xflip=False)
-    args.validation_set_kwargs = dnnlib.EasyDict(class_name='training.dataset.ImageFolderDataset', path=testdata, use_labels=True, max_size=None, xflip=False)
     args.data_loader_kwargs = dnnlib.EasyDict(pin_memory=True, num_workers=3, prefetch_factor=2)
     try:
         training_set = dnnlib.util.construct_class_by_name(**args.training_set_kwargs) # subclass of training.dataset.Dataset
@@ -143,12 +142,14 @@ def setup_training_loop_kwargs(
         args.training_set_kwargs.max_size = len(training_set) # be explicit about dataset size
         desc = training_set.name
         if testdata is not None:
+            args.validation_set_kwargs = dnnlib.EasyDict(class_name='training.dataset.ImageFolderDataset', path=testdata, use_labels=True, max_size=None, xflip=False)
             validation_set = dnnlib.util.construct_class_by_name(**args.validation_set_kwargs)
             args.validation_set_kwargs.resolution = training_set.resolution # be explicit about resolution
             args.validation_set_kwargs.use_labels = training_set.has_labels # be explicit about labels
             args.validation_set_kwargs.max_size = len(validation_set) # be explicit about dataset size
-            
             del validation_set
+        else:
+            args.validation_set_kwargs = {}
         del training_set # conserve memory
     except IOError as err:
         raise UserError(f'--data: {err}')
@@ -162,7 +163,8 @@ def setup_training_loop_kwargs(
         desc += '-cond'
     else:
         args.training_set_kwargs.use_labels = False
-        args.validation_set_kwargs.use_labels = False
+        if args.validation_set_kwargs != {}:
+            args.validation_set_kwargs.use_labels = False
 
     if subset is not None:
         assert isinstance(subset, int)
@@ -568,14 +570,15 @@ def main(ctx, outdir, dry_run, **config_kwargs):
     print(f'Output directory:            {args.run_dir}')
     print(f'Use Comet:                   {bool(args.comet_api_key)}')
     print(f'Training data:               {args.training_set_kwargs.path}')
-    print(f'Validation data:             {args.validation_set_kwargs.path}')
     print(f'Training duration:           {args.total_kimg} kimg')
     print(f'Number of GPUs:              {args.num_gpus}')
     print(f'Number of images:            {args.training_set_kwargs.max_size}')
-    print(f'Number of validation images: {args.validation_set_kwargs.max_size}')
     print(f'Image resolution:            {args.training_set_kwargs.resolution}')
     print(f'Conditional model:           {args.training_set_kwargs.use_labels}')
     print(f'Dataset x-flips:             {args.training_set_kwargs.xflip}')
+    if args.validation_set_kwargs != {}:
+        print(f'Validation data:             {args.validation_set_kwargs.path}')
+        print(f'Number of validation images: {args.validation_set_kwargs.max_size}')
     print()
 
     # Dry run?
