@@ -40,6 +40,7 @@ def setup_training_loop_kwargs(
     snap                    = None, # Snapshot interval: <int>, default = 50 ticks
     metrics                 = None, # List of metric names: [], ['fid50k_full'] (default), ...
     comet_api_key           = None, # API key for Comet.ml: <str>, default = '' (don't use comet)
+    comet_name              = None, # Experiment name for Comet.ml: <str>, default = '' (default Comet naming)
     seed                    = None, # Random seed: <int>, default = 0
 
     # Train ataset.
@@ -106,6 +107,8 @@ def setup_training_loop_kwargs(
 
     if comet_api_key is None:
         comet_api_key = ''
+    if comet_name is None:
+        comet_name = ''
     if comet_api_key:
         if comet_ml is None:
             print('comet_ml is not imported! Proceeding without comet.ml logging')
@@ -117,6 +120,7 @@ def setup_training_loop_kwargs(
                                              auto_output_logging='simple', auto_log_co2=False,
                                              auto_metric_logging=False, auto_param_logging=False,
                                              auto_weight_logging=False)
+            experiment.set_name(comet_name)
             args.comet_experiment_key = experiment.get_key()
     else:
         args.comet_api_key = ''
@@ -465,6 +469,7 @@ class CommaSeparatedList(click.ParamType):
 @click.option('--snap', help='Snapshot interval [default: 50 ticks]', type=int, metavar='INT')
 @click.option('--metrics', help='Comma-separated list or "none" [default: fid50k_full]', type=CommaSeparatedList())
 @click.option('--comet-api-key', help='Comet.ml API key (to log args and metrics)', type=str)
+@click.option('--comet-name', help='Set Comet.ml experiment name', type=str)
 @click.option('--seed', help='Random seed [default: 0]', type=int, metavar='INT')
 @click.option('-n', '--dry-run', help='Print training options and exit', is_flag=True)
 
@@ -568,7 +573,7 @@ def main(ctx, outdir, dry_run, **config_kwargs):
     print(json.dumps(args, indent=2))
     print()
     print(f'Output directory:            {args.run_dir}')
-    print(f'Use Comet:                   {bool(args.comet_api_key)}')
+    print(f'Use comet:                   {bool(args.comet_api_key)}')
     print(f'Training data:               {args.training_set_kwargs.path}')
     print(f'Training duration:           {args.total_kimg} kimg')
     print(f'Number of GPUs:              {args.num_gpus}')
