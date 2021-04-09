@@ -22,7 +22,7 @@ def compute_accuracy(opts, batch_size=32):
     train_all = 0
 
     for i, (train_img, train_c) in enumerate(tqdm(train_dataloader)):
-        train_img = train_img.to(opts.device).to(torch.float32) / 127.5 - 1
+        train_img = train_img.to(opts.device)
         train_c = train_c.to(opts.device)
         gen_logits = D(train_img, train_c)
         train_all += train_img.shape[0]
@@ -38,7 +38,7 @@ def compute_accuracy(opts, batch_size=32):
         validation_all = 0
 
         for i, (validation_img, validation_c) in enumerate(tqdm(validation_dataloader)):
-            validation_img = validation_img.to(opts.device).to(torch.float32) / 127.5 - 1
+            validation_img = validation_img.to(opts.device)
             validation_c = validation_c.to(opts.device)
             gen_logits = D(validation_img, validation_c)
             validation_all += validation_img.shape[0]
