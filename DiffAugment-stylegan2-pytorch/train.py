@@ -40,13 +40,17 @@ def setup_training_loop_kwargs(
     snap                    = None, # Snapshot interval: <int>, default = 50 ticks
     metrics                 = None, # List of metric names: [], ['fid50k_full'] (default), ...
     comet_api_key           = None, # API key for Comet.ml: <str>, default = '' (don't use comet)
+    comet_name              = None, # Experiment name for Comet.ml: <str>, default = '' (default Comet naming)
     seed                    = None, # Random seed: <int>, default = 0
 
-    # Dataset.
+    # Train ataset.
     data                    = None, # Training dataset (required): <path>
     cond                    = None, # Train conditional model based on dataset labels: <bool>, default = False
     subset                  = None, # Train with only N images: <int>, default = all
     mirror                  = None, # Augment dataset with x-flips: <bool>, default = False
+
+    # ValidationDataset.
+    testdata       = None, # Validation dataset (optional): <path>
 
     # Base config.
     cfg                     = None, # Base config: 'auto' (default), 'stylegan2', 'paper256', 'paper512', 'paper1024', 'cifar'
@@ -103,6 +107,8 @@ def setup_training_loop_kwargs(
 
     if comet_api_key is None:
         comet_api_key = ''
+    if comet_name is None:
+        comet_name = ''
     if comet_api_key:
         if comet_ml is None:
             print('comet_ml is not imported! Proceeding without comet.ml logging')
@@ -114,6 +120,7 @@ def setup_training_loop_kwargs(
                                              auto_output_logging='simple', auto_log_co2=False,
                                              auto_metric_logging=False, auto_param_logging=False,
                                              auto_weight_logging=False)
+            experiment.set_name(comet_name)
             args.comet_experiment_key = experiment.get_key()
     else:
         args.comet_api_key = ''
@@ -138,6 +145,15 @@ def setup_training_loop_kwargs(
         args.training_set_kwargs.use_labels = training_set.has_labels # be explicit about labels
         args.training_set_kwargs.max_size = len(training_set) # be explicit about dataset size
         desc = training_set.name
+        if testdata is not None:
+            args.validation_set_kwargs = dnnlib.EasyDict(class_name='training.dataset.ImageFolderDataset', path=testdata, use_labels=True, max_size=None, xflip=False)
+            validation_set = dnnlib.util.construct_class_by_name(**args.validation_set_kwargs)
+            args.validation_set_kwargs.resolution = training_set.resolution # be explicit about resolution
+            args.validation_set_kwargs.use_labels = training_set.has_labels # be explicit about labels
+            args.validation_set_kwargs.max_size = len(validation_set) # be explicit about dataset size
+            del validation_set
+        else:
+            args.validation_set_kwargs = {}
         del training_set # conserve memory
     except IOError as err:
         raise UserError(f'--data: {err}')
@@ -151,6 +167,8 @@ def setup_training_loop_kwargs(
         desc += '-cond'
     else:
         args.training_set_kwargs.use_labels = False
+        if args.validation_set_kwargs != {}:
+            args.validation_set_kwargs.use_labels = False
 
     if subset is not None:
         assert isinstance(subset, int)
@@ -454,11 +472,13 @@ class CommaSeparatedList(click.ParamType):
 @click.option('--snap', help='Snapshot interval [default: 50 ticks]', type=int, metavar='INT')
 @click.option('--metrics', help='Comma-separated list or "none" [default: fid50k_full]', type=CommaSeparatedList())
 @click.option('--comet-api-key', help='Comet.ml API key (to log args and metrics)', type=str)
+@click.option('--comet-name', help='Set Comet.ml experiment name', type=str)
 @click.option('--seed', help='Random seed [default: 0]', type=int, metavar='INT')
 @click.option('-n', '--dry-run', help='Print training options and exit', is_flag=True)
 
 # Dataset.
 @click.option('--data', help='Training data (directory or zip)', metavar='PATH', required=True)
+@click.option('--testdata', help='Test data (directory or zip)', metavar='PATH')
 @click.option('--cond', help='Train conditional model based on dataset labels [default: false]', type=bool, metavar='BOOL')
 @click.option('--subset', help='Train with only N images [default: all]', type=int, metavar='INT')
 @click.option('--mirror', help='Enable dataset x-flips [default: false]', type=bool, metavar='BOOL')
@@ -555,15 +575,18 @@ def main(ctx, outdir, dry_run, **config_kwargs):
     print('Training options:')
     print(json.dumps(args, indent=2))
     print()
-    print(f'Output directory:   {args.run_dir}')
-    print(f'Use Comet:          {bool(args.comet_api_key)}')
-    print(f'Training data:      {args.training_set_kwargs.path}')
-    print(f'Training duration:  {args.total_kimg} kimg')
-    print(f'Number of GPUs:     {args.num_gpus}')
-    print(f'Number of images:   {args.training_set_kwargs.max_size}')
-    print(f'Image resolution:   {args.training_set_kwargs.resolution}')
-    print(f'Conditional model:  {args.training_set_kwargs.use_labels}')
-    print(f'Dataset x-flips:    {args.training_set_kwargs.xflip}')
+    print(f'Output directory:            {args.run_dir}')
+    print(f'Use comet:                   {bool(args.comet_api_key)}')
+    print(f'Training data:               {args.training_set_kwargs.path}')
+    print(f'Training duration:           {args.total_kimg} kimg')
+    print(f'Number of GPUs:              {args.num_gpus}')
+    print(f'Number of images:            {args.training_set_kwargs.max_size}')
+    print(f'Image resolution:            {args.training_set_kwargs.resolution}')
+    print(f'Conditional model:           {args.training_set_kwargs.use_labels}')
+    print(f'Dataset x-flips:             {args.training_set_kwargs.xflip}')
+    if args.validation_set_kwargs != {}:
+        print(f'Validation data:             {args.validation_set_kwargs.path}')
+        print(f'Number of validation images: {args.validation_set_kwargs.max_size}')
     print()
 
     # Dry run?

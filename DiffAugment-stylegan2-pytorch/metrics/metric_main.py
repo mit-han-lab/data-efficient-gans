@@ -17,6 +17,7 @@ import torch
 import dnnlib
 
 from . import metric_utils
+from . import accuracy
 from . import frechet_inception_distance
 from . import kernel_inception_distance
 from . import precision_recall
@@ -102,6 +103,12 @@ def fid50k_full(opts):
     return dict(fid50k_full=fid)
 
 @register_metric
+def fid10k_val_full(opts):
+    opts.validation_dataset_kwargs.update(max_size=None, xflip=False)
+    fid = frechet_inception_distance.compute_fid(opts, max_real=None, num_gen=10000, validation=True)
+    return dict(fid10k_val_full=fid)
+
+@register_metric
 def kid50k_full(opts):
     opts.dataset_kwargs.update(max_size=None, xflip=False)
     kid = kernel_inception_distance.compute_kid(opts, max_real=1000000, num_gen=50000, num_subsets=100, max_subset_size=1000)
@@ -112,6 +119,14 @@ def pr50k3_full(opts):
     opts.dataset_kwargs.update(max_size=None, xflip=False)
     precision, recall = precision_recall.compute_pr(opts, max_real=200000, num_gen=50000, nhood_size=3, row_batch_size=10000, col_batch_size=10000)
     return dict(pr50k3_full_precision=precision, pr50k3_full_recall=recall)
+
+@register_metric
+def accuracy_full(opts):
+    opts.dataset_kwargs.update(max_size=None, xflip=False)
+    accuracy_train, accuracy_val = accuracy.compute_accuracy(opts, batch_size=32)
+    if accuracy_val is not None:
+        return dict(accuracy_full_train=accuracy_train, accuracy_full_val=accuracy_val)
+    return dict(accuracy_full_train=accuracy_train)
 
 @register_metric
 def ppl2_wend(opts):
