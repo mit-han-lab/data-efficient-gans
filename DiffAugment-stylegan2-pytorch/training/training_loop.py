@@ -366,6 +366,21 @@ def training_loop(
             images = torch.cat([G_ema(z=z, c=c, noise_mode='const').cpu() for z, c in zip(grid_z, grid_c)]).numpy()
             save_image_grid(images, os.path.join(run_dir, f'fakes{cur_nimg//1000:06d}.png'), drange=[-1,1], grid_size=grid_size)
 
+        # Log image and text to Comet.ml
+        if rank == 0 and comet_api_key and comet_ml is not None:
+            try:
+                experiment = comet_ml.ExistingExperiment(api_key=comet_api_key,
+                                                         previous_experiment=comet_experiment_key,
+                                                         auto_output_logging=False, auto_log_co2=False,
+                                                         auto_metric_logging=False, auto_param_logging=False,
+                                                         display_summary_level=0)
+                if (image_snapshot_ticks is not None) and (done or cur_tick % image_snapshot_ticks == 0):
+                    experiment.log_image(image_data=os.path.join(run_dir, f'fakes{cur_nimg//1000:06d}.png'),
+                                         name=f'fakes{cur_nimg//1000:06d}', step=cur_nimg)
+                experiment.log_text(text=' '.join(fields_for_comet), step=cur_nimg)
+            except Exception:
+                print('Comet logging failed')
+
         # Save network snapshot.
         snapshot_pkl = None
         snapshot_data = None
@@ -431,21 +446,6 @@ def training_loop(
         maintenance_time = tick_start_time - tick_end_time
         if done:
             break
-
-        # Log to Comet.ml
-        if rank == 0 and comet_api_key and comet_ml is not None:
-            try:
-                experiment = comet_ml.ExistingExperiment(api_key=comet_api_key,
-                                                         previous_experiment=comet_experiment_key,
-                                                         auto_output_logging=False, auto_log_co2=False,
-                                                         auto_metric_logging=False, auto_param_logging=False,
-                                                         display_summary_level=0)
-                if (image_snapshot_ticks is not None) and (done or cur_tick % image_snapshot_ticks == 0):
-                    experiment.log_image(image_data=os.path.join(run_dir, f'fakes{cur_nimg//1000:06d}.png'),
-                                         name=f'fakes{cur_nimg//1000:06d}', step=cur_nimg)
-                experiment.log_text(text=' '.join(fields_for_comet), step=cur_nimg)
-            except Exception:
-                print('Comet logging failed')
 
     # Done.
     if rank == 0:
