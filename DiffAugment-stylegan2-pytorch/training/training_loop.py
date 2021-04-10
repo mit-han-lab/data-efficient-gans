@@ -404,7 +404,7 @@ def training_loop(
                 print('Evaluating metrics...')
             for metric in metrics:
                 result_dict = metric_main.calc_metric(metric=metric, G=snapshot_data['G_ema'], D=snapshot_data['D'],
-                    dataset_kwargs=training_set_kwargs, validation_dataset_kwargs=validation_set_kwargs, num_gpus=num_gpus, rank=rank, device=device)
+                    dataset_kwargs=training_set_kwargs, validation_dataset_kwargs=validation_set_kwargs, num_gpus=num_gpus, rank=rank, device=device, train_dataset=training_set, validation_dataset=validation_set)
                 if rank == 0:
                     metric_main.report_metric(result_dict, run_dir=run_dir, snapshot_pkl=snapshot_pkl,
                                               comet_api_key=comet_api_key, comet_experiment_key=comet_experiment_key,
