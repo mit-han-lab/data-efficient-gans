@@ -288,8 +288,11 @@ def setup_training_loop_kwargs(
         desc += f'-{aug}'
 
 
-    if diffaugment_placement is None and diffaugment is not None:
-        diffaugment_placement = 'real,generated,backprop'
+    if diffaugment_placement is None:
+        if diffaugment:
+            diffaugment_placement = 'real,generated,backprop'
+        else:
+            diffaugment_placement = ''
 
     if diffaugment_placement:
         args.loss_kwargs.diffaugment_placement = diffaugment_placement
@@ -488,7 +491,7 @@ class CommaSeparatedList(click.ParamType):
 
 # Discriminator augmentation.
 @click.option('--DiffAugment', help='Comma-separated list of DiffAugment policy [default: color,translation,cutout]', type=str)
-@click.option('--diffaugment_placement', help='Comma-separated list of DiffAugment applying placement [default: real,generated,backprop]', type=str)
+@click.option('--diffaugment-placement', help='Comma-separated list of DiffAugment applying placement [default: real,generated,backprop]', type=str)
 @click.option('--aug', help='Augmentation mode [default: ada]', type=click.Choice(['noaug', 'ada', 'fixed']))
 @click.option('--p', help='Augmentation probability for --aug=fixed', type=float)
 @click.option('--target', help='ADA target value for --aug=ada', type=float)
