@@ -143,12 +143,10 @@ def training_loop(
     training_set = dnnlib.util.construct_class_by_name(**training_set_kwargs) # subclass of training.dataset.Dataset
     training_set_sampler = misc.InfiniteSampler(dataset=training_set, rank=rank, num_replicas=num_gpus, seed=random_seed)
     training_set_iterator = iter(torch.utils.data.DataLoader(dataset=training_set, sampler=training_set_sampler, batch_size=batch_size//num_gpus, **data_loader_kwargs))
-    training_set_kwargs.dataset = training_set
 
     if validation_set_kwargs != {}:
         validation_set = dnnlib.util.construct_class_by_name(**validation_set_kwargs)
         validation_set_iterator = iter(torch.utils.data.DataLoader(dataset=validation_set, batch_size=batch_size//num_gpus, **data_loader_kwargs))
-        validation_set_kwargs.dataset = validation_set
     if rank == 0:
         print()
         print('Num images: ', len(training_set))
@@ -406,7 +404,7 @@ def training_loop(
                 print('Evaluating metrics...')
             for metric in metrics:
                 result_dict = metric_main.calc_metric(metric=metric, G=snapshot_data['G_ema'], D=snapshot_data['D'],
-                    dataset_kwargs=training_set_kwargs, validation_dataset_kwargs=validation_set_kwargs, num_gpus=num_gpus, rank=rank, device=device)
+                    dataset_kwargs=training_set_kwargs, validation_dataset_kwargs=validation_set_kwargs, num_gpus=num_gpus, rank=rank, device=device, train_dataset=training_set, validation_dataset=validation_set)
                 if rank == 0:
                     metric_main.report_metric(result_dict, run_dir=run_dir, snapshot_pkl=snapshot_pkl,
                                               comet_api_key=comet_api_key, comet_experiment_key=comet_experiment_key,

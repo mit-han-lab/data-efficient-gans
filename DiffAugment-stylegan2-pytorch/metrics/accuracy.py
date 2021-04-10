@@ -14,7 +14,7 @@ from tqdm.auto import tqdm
 
 def compute_accuracy(opts, batch_size=32):
     D = copy.deepcopy(opts.D).eval().requires_grad_(False).to(opts.device)
-    train_dataset = opts.dataset_kwargs.dataset
+    train_dataset = opts.train_dataset
     train_dataloader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size)
 
     train_correct = 0
@@ -30,7 +30,7 @@ def compute_accuracy(opts, batch_size=32):
     train_accuracy = train_correct / train_all
 
     if opts.validation_dataset_kwargs != {}:
-        validation_dataset = opts.validation_dataset_kwargs.dataset
+        validation_dataset = opts.validation_dataset
         validation_dataloader = torch.utils.data.DataLoader(dataset=validation_dataset, batch_size=batch_size)
 
         validation_correct = 0
