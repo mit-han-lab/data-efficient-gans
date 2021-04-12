@@ -21,10 +21,7 @@ def compute_accuracy(opts, batch_size=32):
     train_correct = 0
     train_all = 0
 
-    print(opts)
     for i, (train_img, train_c) in enumerate(tqdm(train_dataloader)):
-        print(train_img, train_c)
-        print(train_img.shape, train_c.shape)
         train_img = train_img.to(opts.device).to(torch.float32) / 127.5 - 1
         train_c = train_c.to(opts.device)
         gen_logits = D(train_img, train_c)
@@ -66,6 +63,6 @@ def compute_accuracy_generated(opts, batch_size=32):
         logits = D(fake_img, torch.empty([batch_size, 0], device=opts.device))
         train_all += fake_img.shape[0]
         train_correct += torch.sum(logits > 0).detach().item()
-
+    print(train_all, train_correct)
     result = train_correct / train_all
     return result
