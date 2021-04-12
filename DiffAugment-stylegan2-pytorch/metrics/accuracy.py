@@ -56,6 +56,7 @@ def compute_accuracy_generated(opts, batch_size=32):
 
     train_correct = 0
     train_all = 0
+    print(opts.validation_dataset, dir(opts.validation_dataset))
     all_z = torch.randn([opts.dataset_kwargs.max_size, G.z_dim], device=opts.device)
     z_loader = torch.utils.data.DataLoader(dataset=all_z, batch_size=batch_size)
     for i, z in enumerate(tqdm(z_loader)):
