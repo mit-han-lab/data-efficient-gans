@@ -62,6 +62,6 @@ def compute_accuracy_generated(opts, batch_size=32):
         fake_img = G(z, torch.empty([batch_size, 0], device=opts.device))
         logits = D(fake_img, torch.empty([batch_size, 0], device=opts.device))
         train_all += fake_img.shape[0]
-        train_correct += torch.sum(logits > 0).detach().item()
+        train_correct += torch.sum(logits <= 0).detach().item()
     result = train_correct / train_all
     return result
