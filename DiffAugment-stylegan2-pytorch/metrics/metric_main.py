@@ -130,7 +130,7 @@ def accuracy_full(opts):
 
 @register_metric
 def accuracy_generated(opts):
-    opts.dataset_kwargs.update(max_size=10000, xflip=False)
+    opts.dataset_kwargs.update(max_size=None, xflip=False)
     accuracy_gen = accuracy.compute_accuracy_generated(opts, batch_size=32)
     return dict(accuracy_gen=accuracy_gen)
 

@@ -56,8 +56,10 @@ def compute_accuracy_generated(opts, batch_size=32):
 
     train_correct = 0
     train_all = 0
-    print(opts.validation_dataset, dir(opts.validation_dataset))
-    all_z = torch.randn([opts.dataset_kwargs.max_size, G.z_dim], device=opts.device)
+    if opts.validation_dataset_kwargs != {}:
+        all_z = torch.randn([len(opts.validation_dataset), G.z_dim], device=opts.device)
+    else:
+        all_z = torch.randn([10000, G.z_dim], device=opts.device)
     z_loader = torch.utils.data.DataLoader(dataset=all_z, batch_size=batch_size)
     for i, z in enumerate(tqdm(z_loader)):
         fake_img = G(z, torch.empty([batch_size, 0], device=opts.device))
