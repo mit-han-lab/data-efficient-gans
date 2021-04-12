@@ -52,7 +52,7 @@ def compute_accuracy(opts, batch_size=32):
 
 def compute_accuracy_generated(opts, batch_size=32):
     D = copy.deepcopy(opts.D).eval().requires_grad_(False).to(opts.device)
-    G = copy.deepcopy(opts.G_ema).eval().requires_grad_(False).to(opts.device)
+    G = copy.deepcopy(opts.G).eval().requires_grad_(False).to(opts.device)
 
     train_correct = 0
     train_all = 0
@@ -63,6 +63,5 @@ def compute_accuracy_generated(opts, batch_size=32):
         logits = D(fake_img, torch.empty([batch_size, 0], device=opts.device))
         train_all += fake_img.shape[0]
         train_correct += torch.sum(logits > 0).detach().item()
-    print(train_all, train_correct)
     result = train_correct / train_all
     return result
