@@ -134,6 +134,13 @@ def accuracy_generated(opts):
     accuracy_gen = accuracy.compute_accuracy_generated(opts, batch_size=32)
     return dict(accuracy_gen=accuracy_gen)
 
+
+@register_metric
+def accuracy_generated_aug(opts):
+    opts.dataset_kwargs.update(max_size=None, xflip=False)
+    accuracy_gen = accuracy.compute_accuracy_generated(opts, batch_size=32, diff_aug=True)
+    return dict(accuracy_gen=accuracy_gen)
+
 @register_metric
 def ppl2_wend(opts):
     ppl = perceptual_path_length.compute_ppl(opts, num_samples=50000, epsilon=1e-4, space='w', sampling='end', crop=False, batch_size=2)

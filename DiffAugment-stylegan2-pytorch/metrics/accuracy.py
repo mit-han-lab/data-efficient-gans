@@ -11,6 +11,7 @@ import torch
 import dnnlib
 from . import metric_utils
 from tqdm.auto import tqdm
+from DiffAugment_pytorch import DiffAugment
 
 
 def compute_accuracy(opts, batch_size=32):
@@ -50,7 +51,7 @@ def compute_accuracy(opts, batch_size=32):
     return train_accuracy, validation_accuracy
 
 
-def compute_accuracy_generated(opts, batch_size=32):
+def compute_accuracy_generated(opts, batch_size=32, diff_aug=False):
     D = copy.deepcopy(opts.D).eval().requires_grad_(False).to(opts.device)
     G = copy.deepcopy(opts.G).eval().requires_grad_(False).to(opts.device)
 
@@ -63,6 +64,8 @@ def compute_accuracy_generated(opts, batch_size=32):
     z_loader = torch.utils.data.DataLoader(dataset=all_z, batch_size=batch_size)
     for i, z in enumerate(tqdm(z_loader)):
         fake_img = G(z, torch.empty([batch_size, 0], device=opts.device))
+        if diff_aug:
+            fake_img = DiffAugment(fake_img, policy=opts.diff_aug_for_metric.diffaugment)
         logits = D(fake_img, torch.empty([batch_size, 0], device=opts.device))
         train_all += fake_img.shape[0]
         train_correct += torch.sum(logits <= 0).detach().item()
