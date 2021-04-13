@@ -404,7 +404,6 @@ def training_loop(
             if rank == 0:
                 print('Evaluating metrics...')
             for metric in metrics:
-                # TODO
                 result_dict = metric_main.calc_metric(metric=metric, G=snapshot_data['G_ema'], D=snapshot_data['D'],
                     dataset_kwargs=training_set_kwargs, validation_dataset_kwargs=validation_set_kwargs,
                                                       num_gpus=num_gpus, rank=rank, device=device,
