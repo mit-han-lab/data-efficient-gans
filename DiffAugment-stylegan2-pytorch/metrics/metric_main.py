@@ -132,14 +132,14 @@ def accuracy_full(opts):
 def accuracy_generated(opts):
     opts.dataset_kwargs.update(max_size=None, xflip=False)
     accuracy_gen = accuracy.compute_accuracy_generated(opts, batch_size=32)
-    return dict(accuracy_gen=accuracy_gen)
+    return dict(accuracy_generated=accuracy_gen)
 
 
 @register_metric
 def accuracy_generated_aug(opts):
     opts.dataset_kwargs.update(max_size=None, xflip=False)
-    accuracy_gen = accuracy.compute_accuracy_generated(opts, batch_size=32, diff_aug=True)
-    return dict(accuracy_gen=accuracy_gen)
+    accuracy_gen_aug = accuracy.compute_accuracy_generated(opts, batch_size=32, diff_aug=True)
+    return dict(accuracy_generated_aug=accuracy_gen_aug)
 
 @register_metric
 def ppl2_wend(opts):
