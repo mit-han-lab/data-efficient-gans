@@ -65,7 +65,7 @@ def compute_accuracy_generated(opts, batch_size=32, diff_aug=False):
     for i, z in enumerate(tqdm(z_loader)):
         fake_img = G(z, torch.empty([batch_size, 0], device=opts.device))
         if diff_aug:
-            fake_img = DiffAugment(fake_img, policy=opts.diff_aug_for_metric.diffaugment)
+            fake_img = DiffAugment(fake_img, policy=opts.loss_kwargs.diffaugment)
         logits = D(fake_img, torch.empty([batch_size, 0], device=opts.device))
         train_all += fake_img.shape[0]
         train_correct += torch.sum(logits <= 0).detach().item()

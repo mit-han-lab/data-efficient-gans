@@ -409,7 +409,7 @@ def training_loop(
                     dataset_kwargs=training_set_kwargs, validation_dataset_kwargs=validation_set_kwargs,
                                                       num_gpus=num_gpus, rank=rank, device=device,
                                                       train_dataset=training_set, validation_dataset=validation_set,
-                                                      diff_aug_for_metric=loss_kwargs)
+                                                      loss_kwargs=loss_kwargs)
                 if rank == 0:
                     metric_main.report_metric(result_dict, run_dir=run_dir, snapshot_pkl=snapshot_pkl,
                                               comet_api_key=comet_api_key, comet_experiment_key=comet_experiment_key,
