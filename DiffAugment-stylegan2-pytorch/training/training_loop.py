@@ -209,6 +209,7 @@ def training_loop(
     if rank == 0:
         print('Setting up training phases...')
     loss = dnnlib.util.construct_class_by_name(device=device, **ddp_modules, **loss_kwargs) # subclass of training.loss.Loss
+    print(loss_kwargs)
     phases = []
     for name, module, opt_kwargs, reg_interval in [('G', G, G_opt_kwargs, G_reg_interval), ('D', D, D_opt_kwargs, D_reg_interval)]:
         if reg_interval is None:
@@ -403,8 +404,12 @@ def training_loop(
             if rank == 0:
                 print('Evaluating metrics...')
             for metric in metrics:
+                # TODO
                 result_dict = metric_main.calc_metric(metric=metric, G=snapshot_data['G_ema'], D=snapshot_data['D'],
-                    dataset_kwargs=training_set_kwargs, validation_dataset_kwargs=validation_set_kwargs, num_gpus=num_gpus, rank=rank, device=device, train_dataset=training_set, validation_dataset=validation_set)
+                    dataset_kwargs=training_set_kwargs, validation_dataset_kwargs=validation_set_kwargs,
+                                                      num_gpus=num_gpus, rank=rank, device=device,
+                                                      train_dataset=training_set, validation_dataset=validation_set,
+                                                      diff_aug_for_metric=loss_kwargs)
                 if rank == 0:
                     metric_main.report_metric(result_dict, run_dir=run_dir, snapshot_pkl=snapshot_pkl,
                                               comet_api_key=comet_api_key, comet_experiment_key=comet_experiment_key,
