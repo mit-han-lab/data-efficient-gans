@@ -13,7 +13,6 @@ from . import metric_utils
 from tqdm.auto import tqdm
 from DiffAugment_pytorch import DiffAugment
 
-
 def compute_accuracy(opts, batch_size=32):
     D = copy.deepcopy(opts.D).eval().requires_grad_(False).to(opts.device)
     train_dataset = opts.train_dataset
