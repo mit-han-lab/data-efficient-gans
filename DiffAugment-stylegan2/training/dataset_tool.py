@@ -197,7 +197,7 @@ def create_dataset(dataset, resolution=None):
         return create_from_lmdb(data_dir, resolution)
     
     if dataset in predefined_datasets:
-        unzip_from_url(data_dir, 'https://hanlab.mit.edu/projects/data-efficient-gans/datasets/{}.zip'.format(dataset))
+        unzip_from_url(data_dir, 'https://data-efficient-gans.mit.edu/datasets/{}.zip'.format(dataset))
     return create_from_images(data_dir, resolution)
 
 

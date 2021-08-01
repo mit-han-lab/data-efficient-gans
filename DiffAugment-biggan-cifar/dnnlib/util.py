@@ -433,4 +433,4 @@ def save_pkl(obj, filename):
 
 
 def get_path_or_url(path_or_url):
-    return path_or_url.replace('mit-han-lab:', 'https://hanlab.mit.edu/projects/data-efficient-gans/models/')
+    return path_or_url.replace('mit-han-lab:', 'https://data-efficient-gans.mit.edu/models/')

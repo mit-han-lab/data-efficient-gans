@@ -1,6 +1,6 @@
 # Data-Efficient GANs with DiffAugment
 
-### [project](https://data-efficient-gans.mit.edu/) | [paper](https://arxiv.org/pdf/2006.10738) | [datasets](https://hanlab.mit.edu/projects/data-efficient-gans/datasets/) | [video](https://www.youtube.com/watch?v=SsqcjS6SVM0) | [slides](https://hanlab.mit.edu/projects/data-efficient-gans/slides.pdf)
+### [project](https://data-efficient-gans.mit.edu/) | [paper](https://arxiv.org/pdf/2006.10738) | [datasets](https://data-efficient-gans.mit.edu/datasets/) | [video](https://www.youtube.com/watch?v=SsqcjS6SVM0) | [slides](https://data-efficient-gans.mit.edu/slides.pdf)
 
 <img src="imgs/interp.gif"/>
 
@@ -55,7 +55,7 @@ You may also try out `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_o
 **[NEW!]** PyTorch training is now available:
 ```bash
 cd DiffAugment-stylegan2-pytorch
-python train.py --outdir=training-runs --data=https://hanlab.mit.edu/projects/data-efficient-gans/datasets/100-shot-obama.zip --gpus=1
+python train.py --outdir=training-runs --data=https://data-efficient-gans.mit.edu/datasets/100-shot-obama.zip --gpus=1
 ```
 
 ## DiffAugment for StyleGAN2

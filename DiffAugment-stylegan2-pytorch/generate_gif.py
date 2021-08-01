@@ -43,7 +43,7 @@ def generate_gif(
 
     \b
     python generate_gif.py --output=obama.gif --seed=0 --num-rows=1 --num-cols=8 \\
-        --network=https://hanlab.mit.edu/projects/data-efficient-gans/models/DiffAugment-stylegan2-100-shot-obama.pkl
+        --network=https://data-efficient-gans.mit.edu/models/DiffAugment-stylegan2-100-shot-obama.pkl
     """
     print('Loading networks from "%s"...' % network_pkl)
     device = torch.device('cuda')
