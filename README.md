@@ -1,119 +1,40 @@
-# Data-Efficient GANs with DiffAugment
+# DiffAugment for StyleGAN2 (PyTorch)
 
-### [project](https://data-efficient-gans.mit.edu/) | [paper](https://arxiv.org/pdf/2006.10738) | [datasets](https://data-efficient-gans.mit.edu/datasets/) | [video](https://www.youtube.com/watch?v=SsqcjS6SVM0) | [slides](https://data-efficient-gans.mit.edu/slides.pdf)
+This repo is implemented upon [stylegan2-ada-pytorch](https://github.com/NVlabs/stylegan2-ada-pytorch) with minimal modifications to train and load DiffAugment-stylegan2 models in PyTorch. Please check the [stylegan2-ada-pytorch](https://github.com/NVlabs/stylegan2-ada-pytorch) README for the dependencies and the other usages of this codebase.
 
-<img src="imgs/interp.gif"/>
+## Requirements
 
-*Generated using only 100 images of Obama, grumpy cats, pandas, the Bridge of Sighs, the Medici Fountain, the Temple of Heaven, without pre-training.*
+* Linux and Windows are supported, but we recommend Linux for performance and compatibility reasons.
+* 1&ndash;8 high-end NVIDIA GPUs with at least 12 GB of memory. We have done all testing and development using NVIDIA DGX-1 with 8 Tesla V100 GPUs.
+* 64-bit Python 3.7 and PyTorch 1.7.1. See [https://pytorch.org/](https://pytorch.org/) for PyTorch install instructions.
+* CUDA toolkit 11.0 or later.  Use at least version 11.1 if running on RTX 3090.  (Why is a separate CUDA toolkit installation required?  See comments in [#2](https://github.com/NVlabs/stylegan2-ada-pytorch/issues/2#issuecomment-779457121).)
+* Python libraries: `pip install click requests tqdm pyspng ninja imageio-ffmpeg==0.4.3`.  We use the Anaconda3 2020.11 distribution which installs most of these by default.
+* Docker users: use the [provided Dockerfile](./Dockerfile) to build an image with the required library dependencies.
 
-**[NEW!]** PyTorch training with [DiffAugment-stylegan2-pytorch](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2-pytorch) is now available!
+The code relies heavily on custom PyTorch extensions that are compiled on the fly using NVCC. On Windows, the compilation requires Microsoft Visual Studio. We recommend installing [Visual Studio Community Edition](https://visualstudio.microsoft.com/vs/) and adding it into `PATH` using `"C:\Program Files (x86)\Microsoft Visual Studio\<VERSION>\Community\VC\Auxiliary\Build\vcvars64.bat"`.
 
-**[NEW!]** Our [Colab tutorial](https://colab.research.google.com/gist/zsyzzsoft/5fbb71b9bf9a3217576bebae5de46fc2/data-efficient-gans.ipynb) is released! [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/gist/zsyzzsoft/5fbb71b9bf9a3217576bebae5de46fc2/data-efficient-gans.ipynb)
+## Low-Shot Generation
 
-**[NEW!]** FFHQ training is supported! See the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2#FFHQ) README.
-
-**[NEW!]** Time to generate 100-shot interpolation videos with [generate_gif.py](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2/generate_gif.py)!
-
-**[NEW!]** Our [DiffAugment-biggan-imagenet](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-imagenet) repo (for TPU training) is released!
-
-**[NEW!]** Our [DiffAugment-biggan-cifar](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-cifar) PyTorch repo is released!
-
-This repository contains our implementation of Differentiable Augmentation (DiffAugment) in both PyTorch and TensorFlow. It can be used to significantly improve the data efficiency for GAN training. We have provided [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) (TensorFlow) and [DiffAugment-stylegan2-pytorch](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2-pytorch), [DiffAugment-biggan-cifar](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-cifar) (PyTorch) for GPU training, and [DiffAugment-biggan-imagenet](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-imagenet) (TensorFlow) for TPU training.
-
-<img src="imgs/low-shot-comparison.jpg" width="1000px"/>
-
-*Low-shot generation without pre-training. With DiffAugment, our model can generate high-fidelity images using only 100 Obama portraits, grumpy cats, or pandas from our collected 100-shot datasets, 160 cats or 389 dogs from the AnimalFace dataset at 256×256 resolution.*
-
-<img src="imgs/cifar10-results.jpg" width="1000px"/>
-
-*Unconditional generation results on CIFAR-10. StyleGAN2’s performance drastically degrades given less training data. With DiffAugment, we are able to roughly match its FID and outperform its Inception Score (IS) using only **20%** training data.*
-
-Differentiable Augmentation for Data-Efficient GAN Training<br>
-[Shengyu Zhao](https://scholar.google.com/citations?user=gLCdw70AAAAJ), [Zhijian Liu](http://zhijianliu.com/), [Ji Lin](http://linji.me/), [Jun-Yan Zhu](https://www.cs.cmu.edu/~junyanz/), and [Song Han](https://songhan.mit.edu/)<br>
-MIT, Tsinghua University, Adobe Research, CMU<br>
-[arXiv](https://arxiv.org/pdf/2006.10738.pdf)
-
-
-## Overview
-<img src="imgs/method.jpg" width="1000px"/>
-
-*Overview of DiffAugment for updating D (left) and G (right). DiffAugment applies the augmentation T to both the real sample x and the generated output G(z). When we update G, gradients need to be back-propagated through T (iii), which requires T to be differentiable w.r.t. the input.*
-
-## Training and Generation with 100 Images [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/gist/zsyzzsoft/5fbb71b9bf9a3217576bebae5de46fc2/data-efficient-gans.ipynb)
-
-To generate an interpolation video using our pre-trained models:
+The following command is an example of training StyleGAN2 with the default *Color + Translation + Cutout* DiffAugment on 100-shot Obama with 1 GPU. See [here](https://data-efficient-gans.mit.edu/datasets/) for a list of our provided low-shot datasets. You may also prepare your own dataset and specify the path to your image folder.
 ```bash
-cd DiffAugment-stylegan2
-python generate_gif.py -r mit-han-lab:DiffAugment-stylegan2-100-shot-obama.pkl -o obama.gif
-```
-or to train a new model:
-```bash
-python run_low_shot.py --dataset=100-shot-obama --num-gpus=4
-```
-You may also try out `100-shot-grumpy_cat`, `100-shot-panda`, `100-shot-bridge_of_sighs`, `100-shot-medici_fountain`, `100-shot-temple_of_heaven`, `100-shot-wuzhen`, or the folder containing your own training images. Please refer to the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2#100-shot-generation) README for the dependencies and details.
-
-**[NEW!]** PyTorch training is now available:
-```bash
-cd DiffAugment-stylegan2-pytorch
 python train.py --outdir=training-runs --data=https://data-efficient-gans.mit.edu/datasets/100-shot-obama.zip --gpus=1
 ```
 
-## DiffAugment for StyleGAN2
+## Pre-Trained Models
 
-To run *StyleGAN2 + DiffAugment* for unconditional generation on the 100-shot datasets, CIFAR, FFHQ, or LSUN, please refer to the [DiffAugment-stylegan2](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) README or [DiffAugment-stylegan2-pytorch](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2-pytorch) for the PyTorch version.
+The following commands are an example of generating images with our pre-trained 100-shot Obama model. See [here](https://data-efficient-gans.mit.edu/models/) for a list of our provided pre-trained models. The code will automatically convert a TensorFlow StyleGAN2 model to the compatible PyTorch version; you may also use `legacy.py` to do this manually.
+```bash
+python generate.py --outdir=out --seeds=1-16 --network=https://data-efficient-gans.mit.edu/models/DiffAugment-stylegan2-100-shot-obama.pkl
 
-## DiffAugment for BigGAN
-
-Please refer to the [DiffAugment-biggan-cifar](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-cifar) README to run *BigGAN + DiffAugment* for conditional generation on CIFAR (using GPUs), and the [DiffAugment-biggan-imagenet](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-biggan-imagenet) README to run on ImageNet (using TPUs).
-
-## Using DiffAugment for Your Own Training
-
-To help you use DiffAugment in your own codebase, we provide portable DiffAugment operations of both TensorFlow and PyTorch versions in [DiffAugment_tf.py](https://github.com/mit-han-lab/data-efficient-gans/blob/master/DiffAugment_tf.py) and [DiffAugment_pytorch.py](https://github.com/mit-han-lab/data-efficient-gans/blob/master/DiffAugment_pytorch.py). Generally, DiffAugment can be easily adopted in any model by substituting every *D(x)* with *D(T(x))*, where *x* can be real images or fake images, *D* is the discriminator, and *T* is the DiffAugment operation. For example,
-
-```python
-from DiffAugment_pytorch import DiffAugment
-# from DiffAugment_tf import DiffAugment
-policy = 'color,translation,cutout' # If your dataset is as small as ours (e.g.,
-# hundreds of images), we recommend using the strongest Color + Translation + Cutout.
-# For large datasets, try using a subset of transformations in ['color', 'translation', 'cutout'].
-# Welcome to discover more DiffAugment transformations!
-
-...
-# Training loop: update D
-reals = sample_real_images() # a batch of real images
-z = sample_latent_vectors()
-fakes = Generator(z) # a batch of fake images
-real_scores = Discriminator(DiffAugment(reals, policy=policy))
-fake_scores = Discriminator(DiffAugment(fakes, policy=policy))
-# Calculating D's loss based on real_scores and fake_scores...
-...
-
-...
-# Training loop: update G
-z = sample_latent_vectors()
-fakes = Generator(z) # a batch of fake images
-fake_scores = Discriminator(DiffAugment(fakes, policy=policy))
-# Calculating G's loss based on fake_scores...
-...
+python generate_gif.py --output=obama.gif --seed=0 --num-rows=1 --num-cols=8 --network=https://data-efficient-gans.mit.edu/models/DiffAugment-stylegan2-100-shot-obama.pkl
 ```
 
-We have implemented Color, Translation, and Cutout DiffAugment as visualized below:
+<img src="../imgs/obama.gif" width="1000px"/>
 
-<img src="imgs/augmentations.jpg" width="800px"/>
+## Other Usages
 
-## Citation
+To train on larger datasets (e.g., CIFAR and FFHQ), please follow the guidelines in the [stylegan2-ada-pytorch](https://github.com/NVlabs/stylegan2-ada-pytorch) README to prepare the datasets.
 
-If you find this code helpful, please cite our paper:
-```
-@inproceedings{zhao2020diffaugment,
-  title={Differentiable Augmentation for Data-Efficient GAN Training},
-  author={Zhao, Shengyu and Liu, Zhijian and Lin, Ji and Zhu, Jun-Yan and Han, Song},
-  booktitle={Conference on Neural Information Processing Systems (NeurIPS)},
-  year={2020}
-}
-```
+## Disclaimer
 
-## Acknowledgements
-
-We thank NSF Career Award #1943349, MIT-IBM Watson AI Lab, Google, Adobe, and Sony for supporting this research.  Research supported with Cloud TPUs from Google's TensorFlow Research Cloud (TFRC). We thank William S. Peebles and Yijun Li for helpful comments.
-
+This PyTorch codebase will not fully reproduce our paper's results, as it uses a different set of hyperparameters and a different evaluation protocal. Please refer to our [TensorFlow repo](https://github.com/mit-han-lab/data-efficient-gans/tree/master/DiffAugment-stylegan2) to fully reproduce the paper's results.
