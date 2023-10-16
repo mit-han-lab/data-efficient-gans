@@ -24,6 +24,7 @@ _inited = False
 _plugin = None
 
 def _init():
+    return False
     global _inited, _plugin
     if not _inited:
         sources = ['upfirdn2d.cpp', 'upfirdn2d.cu']
