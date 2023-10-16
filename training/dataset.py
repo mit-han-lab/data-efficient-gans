@@ -214,6 +214,18 @@ class ImageFolderDataset(Dataset):
                 image = pyspng.load(f.read())
             else:
                 image = np.array(PIL.Image.open(f))
+        
+        # Crop to square
+        width, height, nc = image.shape
+        min_dim = min(width, height)
+        min_dim_log2 = np.floor(np.log2(min_dim))
+        new_dim = int(np.exp2(min_dim_log2))
+        image = image[
+            (width  - new_dim) // 2 : (width  + new_dim) // 2,
+            (height - new_dim) // 2 : (height + new_dim) // 2,
+            ...
+        ]
+        
         if image.ndim == 2:
             image = image[:, :, np.newaxis] # HW => HWC
         image = image.transpose(2, 0, 1) # HWC => CHW
