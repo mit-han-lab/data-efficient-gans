@@ -13,10 +13,11 @@ pyspng
 requests
 scipy
 setuptools
-torch==1.7.1+cu110
-torchaudio==0.7.2
-torchvision==0.8.2+cu110
+torch
+torchaudio
+torchvision
 tqdm
 typing-extensions
-urllib3==1.26.6
+urllib3
 zipp
+groundingdino-py

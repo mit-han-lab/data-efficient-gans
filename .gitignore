@@ -3,6 +3,11 @@ __pycache__/
 *.pyc
 *.so
 *.pkl
+
 imgs/**
+*images/**
+*.jpg
+*.png
+
 *.venv
 training-runs
