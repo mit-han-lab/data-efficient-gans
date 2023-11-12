@@ -1,0 +1,1 @@
+from object_segmentation.object_segmentation import ObjectSegmentation
